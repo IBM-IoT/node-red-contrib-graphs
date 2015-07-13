@@ -1,0 +1,11 @@
+body {
+  padding-top: 70px;
+}
+
+.container {
+  display : none;  
+}
+
+.graphContainer {
+  width: 100%;
+}

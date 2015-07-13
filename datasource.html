@@ -1,0 +1,32 @@
+<script type="text/javascript">
+  RED.nodes.registerType( 'iot-datasource' , {
+      category: 'GatewayKit',
+      color: '#a6bbcf',
+      defaults: {
+          name: { value : "" },
+          historyCount: { value : 100 , validate : RED.validators.number() }
+      },
+      inputs:1,
+      outputs:1,
+      icon: "db.png",
+      label: function() {
+          return this.name || "IoT Datasource";
+      },
+      align: "right"
+  });
+</script>
+
+<script type="text/x-red" data-template-name="iot-datasource">
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+  <div class="form-row">
+    <label for="node-input-historyCount">History Amount</label>
+    <input type="text" id="node-input-historyCount" placeholder="#">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="iot-datasource">
+    <p>Main graph node. More intel later.</p>
+</script>

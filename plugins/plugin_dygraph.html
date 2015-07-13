@@ -1,0 +1,175 @@
+<script type="text/javascript">
+  ( function() {
+
+    var MyGraph = function( container , datasources , config , data ) {
+      this.datasources = datasources;
+
+      this.container = $( '<div style="width:100%"></div>' )[0];
+      $( container ).append( this.container );
+
+      this.config = config;
+      this.data = [];
+      this.graph = null;
+
+      if( data && data.length > 0 )
+      {
+        this.pushData( data );
+      }
+
+      var now = ( new Date() ).getTime();
+      for( var i = 0; i < this.datasources.length; i++ )
+      {
+        this.datasources[i].requestHistoryData( now - 2000 , now - this.config.history );
+      }
+    };
+
+    MyGraph.prototype.pushData = function( index , data ) {
+      if( index < 0 || index >= this.datasources.length ) return;
+      if( !$.isArray( data ) || data.length < 1 ) return;
+
+      if( $.isArray( data[0] ) )
+      {
+        this.addHistoryData( index , data );
+      }
+      else
+      {
+        this.addNewData( index , data );
+      }
+
+      if( this.data.length > 1 )
+      {
+        if( this.graph === null )
+        {
+          var graphLabels = null;
+          if( this.config.hasOwnProperty( "labels" ) )
+          {
+            graphLabels = this.config.labels;
+          }
+          else
+          {
+            graphLabels = [ "Time" ];
+            for( var i = 0; i < this.datasources.length; i++ )
+            {
+              graphLabels.push( "Data #" + ( i + 1 ) );
+            }
+          }
+
+          $( this.container ).empty();
+          this.graph = new Dygraph( this.container , this.data , {
+              connectSeparatedPoints : true,
+              drawPoints : false,
+              showRoller : true,
+              labels : graphLabels,
+              axisLabelColor : "#8d9194",
+              axisLineColor : "#8d9194",
+              gridLineColor : "#4d4e4f",
+              showRangeSelector : ( this.datasources.length === 1 ),
+              rangeSelectorPlotFillColor : "",
+              rangeSelectorPlotStrokeColor : "#c67a08",
+              labelsDivStyles : {
+                "background-color" : "rgba( 0 , 0 , 0 , 0.2 )",
+                color : "#EEE",
+                padding : "5px"
+              },
+              legend : "always",
+              colorValue : 0.7,
+              colorSaturation : 0.6
+          } );
+
+          $( this.container ).find( 'input[type="text"]' ).addClass( "form-control" ).css( "width" , "50px" ).css( "height" , "25px" );
+        }
+        else
+        {
+          this.graph.updateOptions( { file : this.data } );
+        }
+
+        $( this.container ).siblings( "span" ).text( "Count: " + this.data.length );
+      }
+    };
+
+    MyGraph.prototype.addNewData = function( index , data ) {
+      if( data.length < 1 ) return;
+      if( $.isArray( data[0] ) )
+      {
+        for( var i = 0; i < data.length; i++ )
+        {
+          this.addNewData( data[i] );
+        }
+        return;
+      }
+
+      this.data.push( this.createNewDatapoint( data[0] , index , data[1] ) );
+    };
+
+    MyGraph.prototype.addHistoryData = function( index , data ) {
+      var i,k;
+
+      if( this.data.length < 1 || data[ data.length - 1 ][0] < this.data[0][0].getTime() )
+      {
+        for( i = data.length - 1; i >= 0; i-- )
+        {
+          this.data.unshift( this.createNewDatapoint( data[i][0] , index , data[i][1] ) );
+        }
+      }
+      else
+      {
+        data = data.slice( 0 );
+        i = this.findData( data[ data.length - 1 ][0] );
+        while( i >= 0 && data.length > 0 )
+        {
+          if( data[ data.length - 1 ][0] < this.data[i][0].getTime() )
+          {
+            i--;
+            continue;
+          }
+
+          var newData = data.pop();
+          if( this.data[i][0].getTime() == newData[0] )
+          {
+            this.data[i][ index + 1 ] = newData[1];
+          }
+          else
+          {
+            this.data.splice( i + 1 , 0 , this.createNewDatapoint( newData[0] , index , newData[1] ) );
+          }
+        }
+
+        if( data.length > 0 )
+        {
+          this.addHistoryData( index , data );
+        }
+      }
+    };
+
+    MyGraph.prototype.findData = function( timestamp )
+    {
+      var min = 0, max = this.data.length - 1, mid = 0;
+
+      while( max >= min )
+      {
+        mid = Math.floor( ( min + max ) / 2 );
+        if( this.data[ mid ][0].getTime() == timestamp ) return mid;
+        else if( this.data[ mid ][0].getTime() > timestamp ) max = mid - 1;
+        else min = mid + 1;
+      }
+
+      return this.data[ mid ][0].getTime() < timestamp ? mid : mid - 1;
+    };
+
+    MyGraph.prototype.createNewDatapoint = function( timestamp , index , data )
+    {
+      var newData = [ new Date( timestamp ) ];
+      for( var i = 0; i < this.datasources.length; i++ )
+      {
+        newData.push( i === index ? data : null );
+      }
+
+      return newData;
+    };
+
+    App.Plugins.registerChartType( "dygraph" , MyGraph , [
+      "https://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"
+    ] );
+
+  } )();
+</script>

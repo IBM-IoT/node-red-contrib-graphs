@@ -1,0 +1,78 @@
+<script type="text/javascript">
+  ( function() {
+
+    var NVD3Line = function( container , datasources , config , data ) {
+      this.datasources = datasources;
+      this.graph = null;
+      this.data = [];
+
+      var i;
+      for( i = 0; i < this.datasources.length; i++ )
+      {
+        this.data.push( {
+          values : [],
+          key : "Data #" + ( i + 1 )
+        } );
+      }
+
+      this.container = $( '<svg style="height: 300px"></svg>' );
+      $( container ).append( this.container );
+      this.container = this.container[0];
+
+      var now = ( new Date() ).getTime();
+      for( i = 0; i < this.datasources.length; i++ )
+      {
+        this.datasources[i].requestHistoryData( now - 2000 , now - 1200000 );
+      }
+    };
+
+    NVD3Line.prototype.pushData = function( index , data ) {
+
+      if( !$.isArray( data[0] ) ) data = [ data ];
+
+      var i;
+      if( this.data[index].values.length > 0 && data[ data.length - 1 ][0] < this.data[index].values[0].x )
+      {
+        for( i = data.length - 1; i >= 0; i-- )
+        {
+          this.data[index].values.unshift( { x : data[i][0] , y : data[i][1] } );
+        }
+      }
+      else
+      {
+        for( i = 0; i < data.length; i++ )
+        {
+          this.data[index].values.push( { x : data[i][0] , y : data[i][1] } );
+        }
+      }
+
+      if( this.data[index].values.length > 1 )
+      {
+        if( this.graph === null )
+        {
+          this.graph = nv.models.lineChart().margin( { left : 100 } )
+                                            .useInteractiveGuideline( true )
+                                            .showXAxis( true )
+                                            .showYAxis( true );
+
+          this.graph.xAxis.axisLabel( "Time" ).tickFormat( function( ts ) {
+            return d3.time.format( "%H:%M:%S" )( new Date( ts ) );
+          } );
+          this.graph.yAxis.axisLabel( "Data" ).tickFormat( d3.format( ".02f" ) );
+
+          d3.select( this.container ).datum( this.data ).transition().duration( 0 ).call( this.graph );
+        }
+        else
+        {
+          this.graph.update();
+        }
+      }
+    };
+
+    App.Plugins.registerChartType( "nvd3line" , NVD3Line , [
+      "https://cdn.rawgit.com/novus/nvd3/v1.7.1/build/nv.d3.min.js",
+      "https://cdn.rawgit.com/novus/nvd3/v1.7.1/build/nv.d3.css"
+    ] );
+
+  } )();
+</script>
