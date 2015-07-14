@@ -16,10 +16,13 @@
         this.pushData( data );
       }
 
-      var now = ( new Date() ).getTime();
-      for( var i = 0; i < this.datasources.length; i++ )
+      if( this.config.hasOwnProperty( "history" ) )
       {
-        this.datasources[i].requestHistoryData( now - 2000 , now - this.config.history );
+        var now = ( new Date() ).getTime();
+        for( var i = 0; i < this.datasources.length; i++ )
+        {
+          this.datasources[i].requestHistoryData( now - 2000 , now - this.config.history );
+        }
       }
     };
 
