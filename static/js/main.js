@@ -23,17 +23,30 @@ App.Main = ( function() {
 
   function loadGraphs( dashboard )
   {
-    var container = $( "#chartsPage" );
+    var container = $( "#gridList" );
+    var count = 0;
 
     for( var chartid in dashboard.chartSettings )
     {
       var chart = dashboard.chartSettings[ chartid ];
       var i, dsid;
 
-      var outerDiv = $( '<div class="graphContainer"></div>' );
-      outerDiv.append( '<h3>' + chart.name + '</h3><span></span>' );
-      container.append( outerDiv );
+      var listItem = $( '<li></li>' );
+      listItem.attr( {
+        'data-w' : 6,
+        'data-h' : 1,
+        'data-x' : Math.floor( count / 3 ) * 6,
+        'data-y' : count % 3
+      } );
 
+      listItem.append( '<div class="gridItemHeader">' + chart.name + '</div>' );
+
+      var innerContainer = $( '<div class="gridItemContent"></div>' );
+      listItem.append( innerContainer );
+
+      container.append( listItem );
+
+      // continue;
       var ChartPlugin = App.Plugins.getChart( chart.chartPlugin );
       if( ChartPlugin !== null )
       {
@@ -51,7 +64,7 @@ App.Main = ( function() {
           chartDatasources.push( dashboard.datasources[ dsid ] );
         }
 
-        var newChart = new ChartPlugin( outerDiv[0] , chartDatasources , chart.config , [] );
+        var newChart = new ChartPlugin( innerContainer[0] , chartDatasources , chart.config , [] );
         dashboard.charts[ chartid ] = newChart;
         for( i = 0; i < chartDatasources.length; i++ )
         {
@@ -62,7 +75,16 @@ App.Main = ( function() {
       {
         outerDiv.append( '<h3>Chart type not found: ' + chart.chartPlugin + '</h3>' );
       }
+
+      count++;
     }
+
+    $( "#gridList" ).gridList( {
+      rows : 3
+    } , {
+      handle : ".gridItemHeader",
+      zIndex : 1000
+    } );
 
     subscribeToAllDatasources();
   }
@@ -185,6 +207,10 @@ App.Main = ( function() {
   };
 
 } )();
+
+$( window ).on( "resize" , function() {
+  $( "#gridList" ).gridList( "resize" );
+} );
 
 $( document ).on( "ready" , function() {
 

@@ -1,11 +1,62 @@
 body {
   padding-top: 70px;
+  background-color: #202325;
 }
 
 .container {
-  display : none;  
+  display : none;
 }
 
 .graphContainer {
   width: 100%;
+}
+
+#chartsPage {
+  width: 100%;
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+#gridList {
+  position: relative;
+  height: 100%;
+  list-style: none;
+}
+
+#gridList li {
+  overflow: hidden;
+  position: absolute;
+  -moz-transition: top 0.2s,
+                   left 0.2s;
+  -webkit-transition: top 0.2s,
+                      left 0.2s;
+}
+
+#gridList li.ui-draggable-dragging {
+  -moz-transition: none;
+  -webkit-transition: none;
+}
+
+.gridItemHeader {
+  -webkit-user-select: none;
+  height: 10%;
+  display: block;
+  background-color: #353A40;
+  text-align: center;
+  cursor: pointer;
+}
+
+.gridItemContent {
+  height: 89%;
+  padding: .5%;
+  background-color: #292C2F;
+}
+
+.position-highlight {
+  background-color: #1d1f21;
 }

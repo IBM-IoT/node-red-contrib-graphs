@@ -25,7 +25,8 @@
       rows: 5,
       itemSelector: 'li[data-w]',
       widthHeightRatio: 1,
-      dragAndDrop: true
+      dragAndDrop: true,
+      cellMargins : [ 10 , 10 ]
     },
 
     draggableDefaults: {
@@ -87,6 +88,8 @@
     },
 
     _init: function() {
+      this.$element.append( '<li class="position-highlight"></li>' );
+
       // Read items and their meta data. Ignore other list elements (like the
       // position highlight)
       this.$items = this.$element.children(this.options.itemSelector);
@@ -216,11 +219,11 @@
     },
 
     _getItemWidth: function(item) {
-      return item.w * this._cellWidth;
+      return item.w * this._cellWidth - this.options.cellMargins[0];
     },
 
     _getItemHeight: function(item) {
-      return item.h * this._cellHeight;
+      return item.h * this._cellHeight - this.options.cellMargins[1];
     },
 
     _applySizeToItems: function() {
