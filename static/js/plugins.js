@@ -60,10 +60,16 @@ App.Plugins = ( function() {
     return chartTypes.hasOwnProperty( id ) ? chartTypes[ id ] : null;
   }
 
+  function getAllPlugins()
+  {
+    return chartTypes;
+  }
+
   return {
     loadPlugins : loadPlugins,
     registerChartType : registerChartType,
-    getChart : getChart
+    getChart : getChart,
+    getAllPlugins : getAllPlugins
   };
 
 } )();
