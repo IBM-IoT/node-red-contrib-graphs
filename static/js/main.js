@@ -21,6 +21,78 @@ App.Main = ( function() {
     } );
   }
 
+  function createNewChartClick( event )
+  {
+    event.preventDefault();
+
+    var key;
+
+    var $modal = $( "#chartModal" );
+    var $modalBody = $modal.find( ".modal-body" );
+
+    // Build plugins dropdown
+    var $pluginDropdown = $( "#chartPlugins" );
+    $pluginDropdown.empty();
+    var chartPlugins = App.Plugins.getAllPlugins();
+    for( key in chartPlugins )
+    {
+      $pluginDropdown.append( '<li><a data-pluginid="' + key + '" href="#">' + key + '</a></li>' );
+    }
+
+    // Build datasources dropdown
+    var $datasourceDropdown = $( "#chartDatasources" );
+    $datasourceDropdown.empty();
+    for( key in datasources )
+    {
+      $datasourceDropdown.append( '<li><a data-dsid="' + key + '" href="#"><span class="glyphicon glyphicon-plus"></span> ' + datasources[key].name + '</a></li>' );
+    }
+
+    $( "#chartDatasourceList" ).empty();
+
+    $modal.modal( "show" );
+  }
+
+  function chartPluginClick( event )
+  {
+    event.preventDefault();
+
+    var id = $( this ).attr( "data-pluginid" );
+    var name = $( this ).text();
+    $dropdownBtn = $( "#chartPlugins" ).siblings( "button" );
+    $dropdownBtn.attr( "data-pluginid" , id );
+    $dropdownBtn.html( name + ' <span class="caret"></span>' );
+  }
+
+  function chartDatasourceClick( event )
+  {
+    event.stopPropagation();
+    event.preventDefault();
+
+    var id = $( this ).attr( "data-dsid" );
+    var name = $( this ).text().trim();
+
+    // TODO: Use a template engine like jsViews
+    $( "#chartDatasourceList" ).append( '<div class="input-group"><input data-dsid="' + id + '" type="text" class="form-control" disabled value="' + name + '"><span class="input-group-btn"><button class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button></span></div>' );
+    $( this ).remove();
+  }
+
+  function chartDatasourceRemoveClick( event )
+  {
+    var $container = $( this ).parents( ".input-group" );
+    var $input = $container.find( "input" );
+    var id = $input.attr( "data-dsid" );
+    var name = $input.val();
+
+    var $datasourceDropdown = $( "#chartDatasources" );
+    $datasourceDropdown.append( '<li><a data-dsid="' + id + '" href="#"><span class="glyphicon glyphicon-plus"></span> ' + name + '</a></li>' );
+
+    $container.remove();
+  }
+
+  function chartDoneClick()
+  {
+  }
+
   function loadGraphs( dashboard )
   {
     var container = $( "#gridList" );
@@ -184,6 +256,12 @@ App.Main = ( function() {
     } ).always( function() {
       App.Page.navigateTo( "#dashboardPage" );
     } );
+
+    $( "#createNewChart" ).on( "click" , createNewChartClick );
+    $( "#chartPlugins" ).on( "click" , "a" , chartPluginClick );
+    $( "#chartDatasources" ).on( "click" , "a" , chartDatasourceClick );
+    $( "#chartDatasourceList" ).on( "click" , "button" , chartDatasourceRemoveClick );
+    $( "#chartDone" ).on( "click" , chartDoneClick );
   }
 
   function requestHistoryData( id , start , end )
@@ -199,6 +277,15 @@ App.Main = ( function() {
 
       wsServer.send( JSON.stringify( msg ) );
     }
+  }
+
+  function genRandomID( len )
+  {
+    len = len || 16;
+    var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    var id = "";
+    for( var i = 0; i < len; i++ ) id += chars[ Math.floor( Math.random() * 72 ) ];
+    return id;
   }
 
   return {

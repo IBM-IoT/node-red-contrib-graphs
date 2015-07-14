@@ -8,7 +8,11 @@ body {
 }
 
 #navbar-collapsed ul {
-  display : none;  
+  display : none;
+}
+
+.form-control[disabled] {
+  cursor: default;  
 }
 
 .graphContainer {
