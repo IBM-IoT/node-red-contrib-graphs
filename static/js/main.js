@@ -68,29 +68,41 @@ App.Main = ( function() {
     event.stopPropagation();
     event.preventDefault();
 
-    var id = $( this ).attr( "data-dsid" );
-    var name = $( this ).text().trim();
+    var dsData = {
+      id : $( this ).attr( "data-dsid" ),
+      name : $( this ).text().trim()
+    };
 
-    // TODO: Use a template engine like jsViews
-    $( "#chartDatasourceList" ).append( '<div class="input-group"><input data-dsid="' + id + '" type="text" class="form-control" disabled value="' + name + '"><span class="input-group-btn"><button class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button></span></div>' );
+    var template = $.templates( "#tmpl_ChartDatasource" );
+
+    $( "#chartDatasourceList" ).append( template.render( dsData ) );
     $( this ).remove();
   }
 
-  function chartDatasourceRemoveClick( event )
+  function chartDatasourceButtonClick( event )
   {
-    var $container = $( this ).parents( ".input-group" );
-    var $input = $container.find( "input" );
-    var id = $input.attr( "data-dsid" );
-    var name = $input.val();
+    var action = $( this ).attr( "data-act" );
+    var $parent = $( this ).parents( ".panel" );
 
-    var $datasourceDropdown = $( "#chartDatasources" );
-    $datasourceDropdown.append( '<li><a data-dsid="' + id + '" href="#"><span class="glyphicon glyphicon-plus"></span> ' + name + '</a></li>' );
+    if( action == "remove" )
+    {
+      var id = $parent.attr( "data-dsid" );
+      var name = $parent.attr( "data-dsname" );
 
-    $container.remove();
+      var $datasourceDropdown = $( "#chartDatasources" );
+      $datasourceDropdown.append( '<li><a data-dsid="' + id + '" href="#"><span class="glyphicon glyphicon-plus"></span> ' + name + '</a></li>' );
+
+      $parent.remove();
+    }
+    else if( action == "config" )
+    {
+      $parent.find( ".panel-body" ).toggle();
+    }
   }
 
   function chartDoneClick()
   {
+
   }
 
   function loadGraphs( dashboard )
@@ -260,7 +272,7 @@ App.Main = ( function() {
     $( "#createNewChart" ).on( "click" , createNewChartClick );
     $( "#chartPlugins" ).on( "click" , "a" , chartPluginClick );
     $( "#chartDatasources" ).on( "click" , "a" , chartDatasourceClick );
-    $( "#chartDatasourceList" ).on( "click" , "button" , chartDatasourceRemoveClick );
+    $( "#chartDatasourceList" ).on( "click" , "button" , chartDatasourceButtonClick );
     $( "#chartDone" ).on( "click" , chartDoneClick );
   }
 
