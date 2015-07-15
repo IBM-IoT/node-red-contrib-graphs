@@ -76,6 +76,33 @@
       this._applyPositionToItems();
     },
 
+    add: function( element , w , h ) {
+      for( var i = 0; i < this.items.length; i++ )
+      {
+        this.items[i].$element.attr( "data-x" , this.items[i].x );
+        this.items[i].$element.attr( "data-y" , this.items[i].y );
+        this.items[i].$element.attr( "data-w" , this.items[i].w );
+        this.items[i].$element.attr( "data-h" , this.items[i].h );
+      }
+
+      var nextPos = this.gridList.findPositionForItem( { x : 0 , y : 0 , w : w , h : h } , { x : 0 , y : 0 } );
+      element.attr( {
+        "data-x" : nextPos[0],
+        "data-y" : nextPos[1],
+        "data-w" : w,
+        "data-h" : h
+      } );
+
+      this.$element.append( element );
+      this._unbindEvents();
+      this._init();
+      this._bindEvents();
+    },
+
+    debug: function() {
+      console.log( this.gridList.toString() );
+    },
+
     _bindMethod: function(fn) {
       /**
        * Bind prototype method to instance scope (similar to CoffeeScript's fat
@@ -88,8 +115,6 @@
     },
 
     _init: function() {
-      this.$element.append( '<li class="position-highlight"></li>' );
-
       // Read items and their meta data. Ignore other list elements (like the
       // position highlight)
       this.$items = this.$element.children(this.options.itemSelector);
