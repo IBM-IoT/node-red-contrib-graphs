@@ -3,20 +3,15 @@ var App = App || {};
 
 App.Main = ( function() {
 
-  var wsServer = null;
-
-  var dashboards = [];
-  var datasources = null;
-  var currentDashboard = null;
-
   function dashButtonClick()
   {
     var id = $( this ).attr( "data-dash" );
-    currentDashboard = dashboards[ id ];
+    var dashboard = App.Dashboard.getDashboard( id );
+    if( dashboard === null ) return;
 
-    createConnection().done( function() {
+    App.Net.createConnection().done( function() {
       App.Page.navigateTo( "#chartsPage" , function() {
-        loadGraphs( currentDashboard );
+        loadDashboard( dashboard );
       } );
     } );
   }
@@ -42,6 +37,8 @@ App.Main = ( function() {
     // Build datasources dropdown
     var $datasourceDropdown = $( "#chartDatasources" );
     $datasourceDropdown.empty();
+
+    var datasources = App.Datasource.datasources;
     for( key in datasources )
     {
       $datasourceDropdown.append( '<li><a data-dsid="' + key + '" href="#"><span class="glyphicon glyphicon-plus"></span> ' + datasources[key].name + '</a></li>' );
@@ -105,9 +102,11 @@ App.Main = ( function() {
 
   }
 
-  function loadGraphs( dashboard )
+  function loadDashboard( dashboard )
   {
-    var container = $( "#gridList" );
+    App.Dashboard.currentDashboard = dashboard;
+
+    var $container = $( "#gridList" );
     var count = 0;
 
     for( var chartid in dashboard.chartSettings )
@@ -115,135 +114,60 @@ App.Main = ( function() {
       var chart = dashboard.chartSettings[ chartid ];
       var i, dsid;
 
-      var listItem = $( '<li></li>' );
-      listItem.attr( {
+      var template = $.templates( "#tmpl_GridContainer" );
+      var $listItem = $( template.render( { name : chart.name } ) );
+
+      $listItem.attr( {
         'data-w' : 6,
         'data-h' : 1,
         'data-x' : Math.floor( count / 3 ) * 6,
         'data-y' : count % 3
       } );
 
-      listItem.append( '<div class="gridItemHeader">' + chart.name + '</div>' );
-
-      var innerContainer = $( '<div class="gridItemContent"></div>' );
-      listItem.append( innerContainer );
-
-      container.append( listItem );
-
-      // continue;
-      var ChartPlugin = App.Plugins.getChart( chart.chartPlugin );
-      if( ChartPlugin !== null )
-      {
-        var chartDatasources = [];
-        for( i = 0; i < chart.datasources.length; i++ )
-        {
-          dsid = chart.datasources[i];
-          if( !dashboard.datasources.hasOwnProperty( dsid ) )
-          {
-            if( !datasources.hasOwnProperty( dsid ) ) continue;
-
-            dashboard.datasources[ dsid ] = new App.Datasource( dsid );
-          }
-
-          chartDatasources.push( dashboard.datasources[ dsid ] );
-        }
-
-        var newChart = new ChartPlugin( innerContainer[0] , chartDatasources , chart.config , [] );
-        dashboard.charts[ chartid ] = newChart;
-        for( i = 0; i < chartDatasources.length; i++ )
-        {
-          chartDatasources[i].charts.push( { index : i , chart : newChart } );
-        }
-      }
-      else
-      {
-        outerDiv.append( '<h3>Chart type not found: ' + chart.chartPlugin + '</h3>' );
-      }
+      $container.append( $listItem );
+      loadChart( chart , $listItem.find( ".gridItemContent" ) );
 
       count++;
     }
 
-    $( "#gridList" ).gridList( {
+    $container.gridList( {
       rows : 3
     } , {
       handle : ".gridItemHeader",
       zIndex : 1000
     } );
 
-    subscribeToAllDatasources();
+    App.Dashboard.currentDashboard.subscribeToNewDatasources();
   }
 
-  function subscribeToAllDatasources()
+  function loadChart( chart , $container )
   {
-    var subDatasources = [];
-    for( var id in currentDashboard.datasources )
+    var ChartPlugin = App.Plugins.getChart( chart.chartPlugin );
+    if( ChartPlugin !== null )
     {
-      subDatasources.push( id );
-    }
-
-    wsServer.send( JSON.stringify( { m : "sub" , id : subDatasources } ) );
-  }
-
-  function createConnection()
-  {
-    var dfd = $.Deferred();
-
-    wsServer = new WebSocket( "ws://" + location.host + location.pathname + "dsws" );
-
-    wsServer.onopen = function( event ) {
-      dfd.resolve();
-    };
-
-    wsServer.onmessage = function( event ) {
-      var data = event.data;
-      try
+      var chartDatasources = [] , datasource;
+      for( i = 0; i < chart.datasources.length; i++ )
       {
-        data = JSON.parse( data );
-      }
-      catch( e ) {} // No worries, treat data as String
-
-      if( typeof data === "string" )
-      {
-
-      }
-      else
-      {
-        // console.log( "--- New data" );
-        for( var dsid in data )
+        datasource = App.Dashboard.currentDashboard.getDatasource( chart.datasources[i] );
+        if( datasource === null )
         {
-          currentDashboard.pushData( dsid , data[ dsid ] );
-
-          if( $.isArray( data[ dsid ][0] ) )
-          {
-            // console.log( "- " + dsid );
-
-            for( var i = 0; i < data[ dsid ].length; i++ )
-            {
-              var d = new Date( data[ dsid ][i][0] );
-              //console.log( d.getTime() + "(" + d.toLocaleTimeString() + ")" , data[ dsid ][i][1] );
-            }
-          }
+          datasource = new App.Datasource( chart.datasources[i] );
+          App.Dashboard.currentDashboard.addDatasource( datasource );
         }
-      }
-    };
 
-    wsServer.onclose = function( event ) {
-      console.log( "Close" , event );
-      wsServer = null;
-      if( event.code === 1000 )
+        chartDatasources.push( datasource );
+      }
+
+      var newChart = new ChartPlugin( $container[0] , chartDatasources , chart.config , [] );
+      for( i = 0; i < chartDatasources.length; i++ )
       {
-        createConnection().done( function() {
-          subscribeToAllDatasources();
-        } );
+        chartDatasources[i].addChart( i , newChart );
       }
-    };
-
-    wsServer.onerror = function( event ) {
-      console.log( "Error" , event );
-      wsServer = null;
-    };
-
-    return dfd.promise();
+    }
+    else
+    {
+      $container.html( '<div class="alert alert-danger">Could not find plugin: ' + chart.chartPlugin + '</div>' );
+    }
   }
 
   function init()
@@ -251,8 +175,8 @@ App.Main = ( function() {
     App.Plugins.loadPlugins().done( function() {
       $.when( $.getJSON( "api/datasources" ) , App.Settings.loadSettings() ).done( function( _datasources , _settings ) {
 
-        datasources = _datasources[0];
-        dashboards = _settings;
+        App.Datasource.datasources = _datasources[0];
+        var dashboards = App.Dashboard.dashboards = _settings;
 
         var container = $( "#dashboardPage" );
         for( var i = 0; i < dashboards.length; i++ )
@@ -276,21 +200,6 @@ App.Main = ( function() {
     $( "#chartDone" ).on( "click" , chartDoneClick );
   }
 
-  function requestHistoryData( id , start , end )
-  {
-    if( wsServer )
-    {
-      var msg = {
-        m : "history",
-        id : id,
-        start : start,
-        end : end
-      };
-
-      wsServer.send( JSON.stringify( msg ) );
-    }
-  }
-
   function genRandomID( len )
   {
     len = len || 16;
@@ -301,8 +210,7 @@ App.Main = ( function() {
   }
 
   return {
-    init : init,
-    requestHistoryData : requestHistoryData
+    init : init
   };
 
 } )();

@@ -7,6 +7,10 @@ App.Datasource = function( id ) {
   this.end = null;
 };
 
+App.Datasource.prototype.addChart = function( index , chart ) {
+  this.charts.push( { index : index , chart : chart } );
+};
+
 App.Datasource.prototype.pushData = function( data ) {
   for( var i = 0; i < this.charts.length; i++ )
   {
@@ -22,5 +26,7 @@ App.Datasource.prototype.requestHistoryData = function( start , end ) {
   }
 
   this.end = end;
-  App.Main.requestHistoryData( this.id , start , end );
+  App.Net.requestHistoryData( this.id , start , end );
 };
+
+App.Datasource.datasources = null;
