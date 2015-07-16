@@ -109,9 +109,13 @@ App.Pages.Charts = ( function() {
     }
 
     var template = $.templates( "#tmpl_GridContainer" );
-    var $listItem = $( template.render( { name : chart.name } ) );
+    var $listItem = $( template.render( {
+      id : id,
+      name : chart.name
+    } ) );
+
     $( "#gridList" ).gridList( "add" , $listItem , DEFAULT_CHART_WIDTH , DEFAULT_CHART_HEIGHT );
-    loadChart( chart , $listItem.find( ".gridItemContent" ) );
+    loadChart( id , chart , $listItem.find( ".gridItemContent" ) );
     App.Dashboard.currentDashboard.subscribeToNewDatasources();
 
     $( "#chartModal" ).modal( "hide" );
@@ -120,10 +124,11 @@ App.Pages.Charts = ( function() {
   function gridHeaderButtonClick()
   {
     var action = $( this ).attr( "data-act" );
+    var $parent = $( this ).parents( "li" );
 
     if( action == "remove" )
     {
-      $content = $( this ).parents( "li" ).find( ".gridItemContent" );
+      $content = $parent.find( ".gridItemContent" );
       if( $content.find( ".gridItemOverlay" ).length > 0 ) return;
 
       $overlay = $(
@@ -134,12 +139,20 @@ App.Pages.Charts = ( function() {
       );
 
       $overlay.on( "click" , "button" , function() {
+        var $parent = null;
         if( $( this ).hasClass( "btn-danger" ) )
         {
-          var $parent = $( this ).parents( ".gridItemOverlay" );
+          $parent = $( this ).parents( ".gridItemOverlay" );
           $parent.fadeOut( 200 , function() {
             $parent.remove();
           } );
+        }
+        else
+        {
+          $parent = $( this ).parents( "li" );
+          var id = $parent.attr( "data-id" );
+          $( "#gridList" ).gridList( "remove" , $parent );
+          App.Dashboard.currentDashboard.removeChart( id );
         }
       } );
 
@@ -165,17 +178,20 @@ App.Pages.Charts = ( function() {
       var i, dsid;
 
       var template = $.templates( "#tmpl_GridContainer" );
-      var $listItem = $( template.render( { name : chart.name } ) );
+      var $listItem = $( template.render( {
+        id : chartid,
+        name : chart.name
+      } ) );
 
       $listItem.attr( {
         'data-w' : DEFAULT_CHART_WIDTH,
         'data-h' : DEFAULT_CHART_HEIGHT,
-        'data-x' : Math.floor( count / 3 ) * 6,
+        'data-x' : Math.floor( count / 3 ) * DEFAULT_CHART_WIDTH,
         'data-y' : count % 3
       } );
 
       $container.append( $listItem );
-      loadChart( chart , $listItem.find( ".gridItemContent" ) );
+      loadChart( chartid , chart , $listItem.find( ".gridItemContent" ) );
 
       count++;
     }
@@ -190,7 +206,7 @@ App.Pages.Charts = ( function() {
     App.Dashboard.currentDashboard.subscribeToNewDatasources();
   }
 
-  function loadChart( chart , $container )
+  function loadChart( id , chart , $container )
   {
     var ChartPlugin = App.Plugins.getChart( chart.chartPlugin );
     if( ChartPlugin !== null )
@@ -211,7 +227,7 @@ App.Pages.Charts = ( function() {
       var newChart = new ChartPlugin( $container[0] , chartDatasources , chart.config , [] );
       for( i = 0; i < chartDatasources.length; i++ )
       {
-        chartDatasources[i].addChart( i , newChart );
+        chartDatasources[i].addChart( id , i , newChart );
       }
     }
     else
