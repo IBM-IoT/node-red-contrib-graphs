@@ -77,13 +77,7 @@
     },
 
     add: function( element , w , h ) {
-      for( var i = 0; i < this.items.length; i++ )
-      {
-        this.items[i].$element.attr( "data-x" , this.items[i].x );
-        this.items[i].$element.attr( "data-y" , this.items[i].y );
-        this.items[i].$element.attr( "data-w" , this.items[i].w );
-        this.items[i].$element.attr( "data-h" , this.items[i].h );
-      }
+      this._updateElementData();
 
       var nextPos = this.gridList.findPositionForItem( { x : 0 , y : 0 , w : w , h : h } , { x : 0 , y : 0 } );
       element.attr( {
@@ -99,8 +93,29 @@
       this._bindEvents();
     },
 
+    remove: function( element ) {
+      this._updateElementData();
+
+      element.remove();
+
+      this._unbindEvents();
+      this._init();
+      this._bindEvents();
+      this.resize();
+    },
+
     debug: function() {
       console.log( this.gridList.toString() );
+    },
+
+    _updateElementData: function() {
+      for( var i = 0; i < this.items.length; i++ )
+      {
+        this.items[i].$element.attr( "data-x" , this.items[i].x );
+        this.items[i].$element.attr( "data-y" , this.items[i].y );
+        this.items[i].$element.attr( "data-w" , this.items[i].w );
+        this.items[i].$element.attr( "data-h" , this.items[i].h );
+      }
     },
 
     _bindMethod: function(fn) {
