@@ -5,7 +5,6 @@ App.Dashboard = function( name ) {
   this.name = name;
   this.datasources = {};
   this.newDatasources = [];
-  this.charts = {};
   this.chartSettings = {};
 };
 
@@ -18,6 +17,18 @@ App.Dashboard.prototype.addDatasource = function( datasource ) {
 
   this.datasources[ datasource.id ] = datasource;
   this.newDatasources.push( datasource.id );
+};
+
+App.Dashboard.prototype.removeChart = function( id ) {
+  for( var dsid in this.datasources )
+  {
+    this.datasources[ dsid ].removeChart( id );
+    if( this.datasources[ dsid ].isEmpty() )
+    {
+      // TODO: Stop datasource subscription
+      delete this.datasources[ dsid ];
+    }
+  }
 };
 
 App.Dashboard.prototype.subscribeToNewDatasources = function() {
