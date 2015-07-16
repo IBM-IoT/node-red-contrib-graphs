@@ -6,6 +6,7 @@ App.Dashboard = function( name ) {
   this.datasources = {};
   this.newDatasources = [];
   this.chartSettings = {};
+  this.charts = {};
 };
 
 App.Dashboard.prototype.getDatasource = function( id ) {
@@ -39,7 +40,7 @@ App.Dashboard.prototype.subscribeToNewDatasources = function() {
 
 App.Dashboard.prototype.subscribeToAllDatasources = function() {
   var sub = [];
-  for( var id in this.datasources ) sub.push( this.datasources[id] );
+  for( var id in this.datasources ) sub.push( id );
   App.Net.subscribeToDatasources( sub );
 };
 
