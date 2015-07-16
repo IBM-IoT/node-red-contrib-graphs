@@ -3,6 +3,9 @@ var App = App || {};
 
 App.Main = ( function() {
 
+  var DEFAULT_CHART_WIDTH = 4;
+  var DEFAULT_CHART_HEIGHT = 1;
+
   function dashButtonClick()
   {
     var id = $( this ).attr( "data-dash" );
@@ -56,7 +59,7 @@ App.Main = ( function() {
     var id = $( this ).attr( "data-pluginid" );
     var name = $( this ).text();
     $dropdownBtn = $( "#chartPlugins" ).siblings( "button" );
-    $dropdownBtn.attr( "data-pluginid" , id );
+    $( "#chartPlugins" ).attr( "data-pluginid" , id );
     $dropdownBtn.html( name + ' <span class="caret"></span>' );
   }
 
@@ -99,7 +102,66 @@ App.Main = ( function() {
 
   function chartDoneClick()
   {
+    // TODO: Validate form
 
+    var id = genRandomID(),
+        chart = {},
+        i;
+    chart.name = $( "#chartName" ).val().trim();
+    chart.chartPlugin = $( "#chartPlugins" ).attr( "data-pluginid" );
+    chart.datasources = [];
+    chart.config = {
+      history : 1200000
+    };
+
+    $datasources = $( "#chartDatasourceList" ).find( "div[data-dsid]" );
+    for( i = 0; i < $datasources.length; i++ )
+    {
+      chart.datasources.push( $( $datasources[i] ).attr( "data-dsid" ) );
+    }
+
+    var template = $.templates( "#tmpl_GridContainer" );
+    var $listItem = $( template.render( { name : chart.name } ) );
+    $( "#gridList" ).gridList( "add" , $listItem , DEFAULT_CHART_WIDTH , DEFAULT_CHART_HEIGHT );
+    loadChart( chart , $listItem.find( ".gridItemContent" ) );
+    App.Dashboard.currentDashboard.subscribeToNewDatasources();
+
+    $( "#chartModal" ).modal( "hide" );
+  }
+
+  function gridHeaderButtonClick()
+  {
+    var action = $( this ).attr( "data-act" );
+
+    if( action == "remove" )
+    {
+      $content = $( this ).parents( "li" ).find( ".gridItemContent" );
+      if( $content.find( ".gridItemOverlay" ).length > 0 ) return;
+
+      $overlay = $(
+        '<div class="gridItemOverlay" style="display:none"><div class="gridItemOverlayContent">' +
+        '<p>Are you sure you want to delete this chart?</p>' +
+        '<p><button type="button" class="btn btn-success">Yes</button> <button type="button" class="btn btn-danger">Cancel</button></p>' +
+        '</div></div>'
+      );
+
+      $overlay.on( "click" , "button" , function() {
+        if( $( this ).hasClass( "btn-danger" ) )
+        {
+          var $parent = $( this ).parents( ".gridItemOverlay" );
+          $parent.fadeOut( 200 , function() {
+            $parent.remove();
+          } );
+        }
+      } );
+
+      $content.append( $overlay );
+      $overlay.fadeIn( 200 );
+    }
+    else if( action == "edit" )
+    {
+
+    }
   }
 
   function loadDashboard( dashboard )
@@ -118,8 +180,8 @@ App.Main = ( function() {
       var $listItem = $( template.render( { name : chart.name } ) );
 
       $listItem.attr( {
-        'data-w' : 6,
-        'data-h' : 1,
+        'data-w' : DEFAULT_CHART_WIDTH,
+        'data-h' : DEFAULT_CHART_HEIGHT,
         'data-x' : Math.floor( count / 3 ) * 6,
         'data-y' : count % 3
       } );
@@ -198,6 +260,7 @@ App.Main = ( function() {
     $( "#chartDatasources" ).on( "click" , "a" , chartDatasourceClick );
     $( "#chartDatasourceList" ).on( "click" , "button" , chartDatasourceButtonClick );
     $( "#chartDone" ).on( "click" , chartDoneClick );
+    $( document ).on( "click" , ".gridItemHeader button" , gridHeaderButtonClick );
   }
 
   function genRandomID( len )
@@ -205,7 +268,7 @@ App.Main = ( function() {
     len = len || 16;
     var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     var id = "";
-    for( var i = 0; i < len; i++ ) id += chars[ Math.floor( Math.random() * 72 ) ];
+    for( var i = 0; i < len; i++ ) id += chars[ Math.floor( Math.random() * 62 ) ];
     return id;
   }
 

@@ -100,7 +100,13 @@
 
     <script id="tmpl_GridContainer" type="text/x-jsrender">
       <li>
-        <div class="gridItemHeader">{{:name}}</div>
+        <div class="gridItemHeader">
+          {{:name}}
+          <div style="float:right">
+            <button data-act="edit" type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil"></span></button>
+            <button data-act="remove" type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-trash"></span></button>
+          </div>
+        </div>
         <div class="gridItemContent"></div>
       </li>
     </script>
