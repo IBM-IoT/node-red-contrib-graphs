@@ -3,18 +3,42 @@ var App = App || {};
 
 App.Datasource = function( id ) {
   this.id = id;
-  this.charts = [];
+  this.chartCount = 0;
+  this.charts = {};
   this.end = null;
 };
 
-App.Datasource.prototype.addChart = function( index , chart ) {
-  this.charts.push( { index : index , chart : chart } );
+App.Datasource.prototype.addChart = function( id , index , chart ) {
+  if( this.charts.hasOwnProperty( id ) )
+  {
+    console.error( "Datasource already has chart: " + id );
+    return;
+  }
+
+  this.charts[ id ] = {
+    index : index,
+    chart : chart
+  };
+
+  this.chartCount++;
+};
+
+App.Datasource.prototype.removeChart = function( id ) {
+  if( this.charts.hasOwnProperty( id ) )
+  {
+    delete this.charts[ id ];
+    this.chartCount--;
+  }
+};
+
+App.Datasource.prototype.isEmpty = function() {
+  return this.chartCount === 0;
 };
 
 App.Datasource.prototype.pushData = function( data ) {
-  for( var i = 0; i < this.charts.length; i++ )
+  for( var id in this.charts )
   {
-    this.charts[i].chart.pushData( this.charts[i].index , data );
+    this.charts[id].chart.pushData( this.charts[id].index , data );
   }
 };
 
