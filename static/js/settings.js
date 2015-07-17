@@ -36,29 +36,33 @@ App.Settings = ( function() {
     return dfd.promise();
   }
 
-  function saveDashboards( dashboards )
+  function saveSettings()
   {
-    settings.dashboards = {};
+    var settings = {};
+    settings.dashboards = [];
+    var i;
 
-    for( var dashid in dashboards )
+    for( i = 0; i < App.Dashboard.dashboards.length; i++ )
     {
-      settings.dashboards[ dashid ] = {
-        charts : {}
-      };
-      for( var chartid in dashboards[ dashid ].charts )
-      {
-        settings.dashboards[ dashid ].charts[ chartid ] = dashboards[ dashid ].charts[ chartid ];
-      }
+      settings.dashboards.push( App.Dashboard.dashboards[i].serialize() );
     }
 
-    $.post( "api/user/settings" , JSON.stringify( settings ) ).done( function( data ) {
-      console.log( "Save Settings: " + data );
+    $.ajax( {
+      method : "POST",
+      url : "api/user/settings",
+      data : JSON.stringify( settings ),
+      contentType : "text/plain"
+    } ).done( function( data ) {
+      if( data != "ok" )
+      {
+        console.error( "Error saving settings: " + data );
+      }
     } );
   }
 
   return {
     loadSettings : loadSettings,
-    saveDashboards : saveDashboards
+    saveSettings : saveSettings
   };
 
 } )();
