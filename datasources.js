@@ -55,7 +55,7 @@ function handleWSConnection( ws )
 
     if( !msg.hasOwnProperty( "m" ) ) return;
 
-    var node;
+    var node, i;
     if( msg.m == "history" )
     {
       node = RED.nodes.getNode( msg.id );
@@ -67,7 +67,7 @@ function handleWSConnection( ws )
     else if( msg.m == "sub" )
     {
       if( !util.isArray( msg.id ) ) msg.id = [ msg.id ];
-      for( var i = 0; i < msg.id.length; i++ )
+      for( i = 0; i < msg.id.length; i++ )
       {
         node = RED.nodes.getNode( msg.id[i] );
         if( node )
@@ -76,6 +76,19 @@ function handleWSConnection( ws )
         }
       }
     }
+    else if( msg.m == "unsub" )
+    {
+      if( !util.isArray( msg.id ) ) msg.id = [ msg.id ];
+      for( i = 0; i < msg.id.length; i++ )
+      {
+        node = RED.nodes.getNode( msg.id[i] );
+        if( node )
+        {
+          node.removeClient( ws );
+        }
+      }
+    }
+
   } );
 
   ws.on( "close" , function( code , message ) {

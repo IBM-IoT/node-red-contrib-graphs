@@ -128,6 +128,19 @@ module.exports = function(RED)
           this.send( { payload : { start : start , end : end } } );
         }
       };
+
+      this.removeClient = function( ws )
+      {
+        for( var i = 0; i < this.clients.length; i++ )
+        {
+          if( this.clients[i].ws == ws )
+          {
+            RED.log.info( "Client removed" );
+            this.clients.splice( i , 1 );
+            return;
+          }
+        }
+      };
   }
 
   RED.nodes.registerType( "iot-datasource", Datasource );
