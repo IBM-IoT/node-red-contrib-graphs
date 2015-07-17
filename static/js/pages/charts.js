@@ -20,6 +20,8 @@ App.Pages.Charts = ( function() {
     var $modalTitle = $modal.find( ".modal-title" );
     var $modalBody = $modal.find( ".modal-body" );
 
+    $( "#chartError" ).hide();
+
     // Build plugins dropdown
     var $pluginDropdown = $( "#chartPlugins" );
     $pluginDropdown.empty();
@@ -129,11 +131,28 @@ App.Pages.Charts = ( function() {
 
   function chartDoneClick()
   {
-    // TODO: Validate form
-
     var id = genRandomID(),
         chart = {},
         i;
+
+    // Validate
+    var errors = [];
+
+    var chartName = $( "#chartName" ).val().trim();
+    var chartPlugin = $( "#chartPlugins" ).attr( "data-pluginid" );
+    $datasources = $( "#chartDatasourceList" ).find( "div[data-dsid]" );
+
+    if( chartName.length < 1 ) errors.push( "Please enter a name." );
+    if( chartPlugin === undefined ) errors.push( "Please select a plugin." );
+    if( $datasources.length < 1 ) errors.push( "Please add at least one datasource." );
+
+    if( errors.length > 0 )
+    {
+      $alertBox = $( "#chartError" );
+      $alertBox.html( errors.join( "<br>" ) );
+      $alertBox.show();
+      return;
+    }
 
     if( editingChart !== null )
     {
@@ -141,14 +160,13 @@ App.Pages.Charts = ( function() {
       chart = App.Dashboard.currentDashboard.chartSettings[ id ];
     }
 
-    chart.name = $( "#chartName" ).val().trim();
-    chart.chartPlugin = $( "#chartPlugins" ).attr( "data-pluginid" );
+    chart.name = chartName;
+    chart.chartPlugin = chartPlugin;
     chart.datasources = [];
     chart.config = {
       history : 1200000
     };
 
-    $datasources = $( "#chartDatasourceList" ).find( "div[data-dsid]" );
     for( i = 0; i < $datasources.length; i++ )
     {
       chart.datasources.push( $( $datasources[i] ).attr( "data-dsid" ) );
