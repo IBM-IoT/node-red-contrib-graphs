@@ -7,13 +7,17 @@ App.Pages.Charts = ( function() {
   var DEFAULT_CHART_WIDTH = 4;
   var DEFAULT_CHART_HEIGHT = 1;
 
-  function createNewChartClick( event )
-  {
-    event.preventDefault();
+  var editingChart = null;
 
-    var key;
+  function openChartModal( chartid )
+  {
+    var chart = ( chartid === undefined ? null : App.Dashboard.currentDashboard.chartSettings[ chartid ] );
+    if( chart !== null ) editingChart = chartid;
+
+    var key, i;
 
     var $modal = $( "#chartModal" );
+    var $modalTitle = $modal.find( ".modal-title" );
     var $modalBody = $modal.find( ".modal-body" );
 
     // Build plugins dropdown
@@ -37,7 +41,49 @@ App.Pages.Charts = ( function() {
 
     $( "#chartDatasourceList" ).empty();
 
+    if( chart === null )
+    {
+      $modalTitle.text( "Create New Chart" );
+
+      $( "#chartName" ).val( "" );
+      $( "#chartPluginsButton" ).html( 'Select plugin <span class="caret"></span>' );
+      $( "#chartPlugins" ).removeAttr( "data-pluginid" );
+    }
+    else
+    {
+      $modalTitle.text( "Edit Chart" );
+
+      $( "#chartName" ).val( chart.name );
+      $( "#chartPluginsButton" ).html( chart.chartPlugin + ' <span class="caret"></span>' );
+      $( "#chartPlugins" ).attr( "data-pluginid" , chart.chartPlugin );
+
+      for( i = 0; i < chart.datasources.length; i++ )
+      {
+        modalAddDatasource( chart.datasources[i] , datasources[ chart.datasources[i] ].name );
+
+        // TODO: Oh God fix this!
+        $datasourceDropdown.find( 'a[data-dsid="' + chart.datasources[i] + '"]' ).parent().remove();
+      }
+    }
+
     $modal.modal( "show" );
+  }
+
+  function modalAddDatasource( id , name )
+  {
+    dsData = {
+      id : id,
+      name : name
+    };
+
+    var template = $.templates( "#tmpl_ChartDatasource" );
+    $( "#chartDatasourceList" ).append( template.render( dsData ) );
+  }
+
+  function createNewChartClick( event )
+  {
+    event.preventDefault();
+    openChartModal();
   }
 
   function chartPluginClick( event )
@@ -56,14 +102,7 @@ App.Pages.Charts = ( function() {
     event.stopPropagation();
     event.preventDefault();
 
-    var dsData = {
-      id : $( this ).attr( "data-dsid" ),
-      name : $( this ).text().trim()
-    };
-
-    var template = $.templates( "#tmpl_ChartDatasource" );
-
-    $( "#chartDatasourceList" ).append( template.render( dsData ) );
+    modalAddDatasource( $( this ).attr( "data-dsid" ) , $( this ).text().trim() );
     $( this ).remove();
   }
 
@@ -95,6 +134,13 @@ App.Pages.Charts = ( function() {
     var id = genRandomID(),
         chart = {},
         i;
+
+    if( editingChart !== null )
+    {
+      id = editingChart;
+      chart = App.Dashboard.currentDashboard.chartSettings[ id ];
+    }
+
     chart.name = $( "#chartName" ).val().trim();
     chart.chartPlugin = $( "#chartPlugins" ).attr( "data-pluginid" );
     chart.datasources = [];
@@ -108,15 +154,38 @@ App.Pages.Charts = ( function() {
       chart.datasources.push( $( $datasources[i] ).attr( "data-dsid" ) );
     }
 
-    var template = $.templates( "#tmpl_GridContainer" );
-    var $listItem = $( template.render( {
-      id : id,
-      name : chart.name
-    } ) );
+    var $listItem;
 
-    $( "#gridList" ).gridList( "add" , $listItem , DEFAULT_CHART_WIDTH , DEFAULT_CHART_HEIGHT );
-    loadChart( id , chart , $listItem.find( ".gridItemContent" ) );
+    if( editingChart === null )
+    {
+      var template = $.templates( "#tmpl_GridContainer" );
+      $listItem = $( template.render( {
+        id : id,
+        name : chart.name
+      } ) );
+
+      $( "#gridList" ).gridList( "add" , $listItem , DEFAULT_CHART_WIDTH , DEFAULT_CHART_HEIGHT );
+      loadChart( id , chart , $listItem.find( ".gridItemContent" ) );
+    }
+    else
+    {
+      $listItem = $( '#gridList li[data-id="' + editingChart + '"]' );
+      $listItem.find( ".gridItemHeader > span" ).text( chart.name );
+
+      // For now, re-create the chart to change settings...
+      // TODO: Allow chart plugins to handle settings changes
+
+      App.Dashboard.currentDashboard.removeChart( id );
+
+      $container = $listItem.find( ".gridItemContent" );
+      $container.empty();
+      loadChart( id , chart , $container );
+    }
+
     App.Dashboard.currentDashboard.subscribeToNewDatasources();
+
+    editingChart = null;
+    App.Settings.saveSettings();
 
     $( "#chartModal" ).modal( "hide" );
   }
@@ -153,6 +222,7 @@ App.Pages.Charts = ( function() {
           var id = $parent.attr( "data-id" );
           $( "#gridList" ).gridList( "remove" , $parent );
           App.Dashboard.currentDashboard.removeChart( id );
+          App.Settings.saveSettings();
         }
       } );
 
@@ -161,7 +231,8 @@ App.Pages.Charts = ( function() {
     }
     else if( action == "edit" )
     {
-
+      var chartid = $parent.attr( "data-id" );
+      openChartModal( chartid );
     }
   }
 
@@ -229,6 +300,9 @@ App.Pages.Charts = ( function() {
       {
         chartDatasources[i].addChart( id , i , newChart );
       }
+
+      App.Dashboard.currentDashboard.chartSettings[ id ] = chart;
+      App.Dashboard.currentDashboard.charts[ id ] = newChart;
     }
     else
     {

@@ -36,7 +36,7 @@
         </div>
         <div class="collapse navbar-collapse" id="navbar-collapsed">
           <ul class="nav navbar-nav navbar-right" id="dashboardPageNav">
-            <li><a href="#"><span class="glyphicon glyphicon-plus"></span> Create New Dashboard</a></li>
+            <!-- <li><a href="#"><span class="glyphicon glyphicon-plus"></span> Create New Dashboard</a></li> -->
           </ul>
           <ul class="nav navbar-nav navbar-right" id="chartsPageNav">
             <li><a href="#" id="createNewChart"><span class="glyphicon glyphicon-plus"></span> Create New Chart</a></li>
@@ -70,9 +70,7 @@
             <div class="form-group">
               <label>Plugin</label>
               <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-                  Select plugin
-                  <span class="caret"></span>
+                <button id="chartPluginsButton" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
                 </button>
                 <ul class="dropdown-menu" id="chartPlugins"></ul>
               </div>
@@ -102,7 +100,7 @@
     <script id="tmpl_GridContainer" type="text/x-jsrender">
       <li data-id="{{:id}}">
         <div class="gridItemHeader">
-          {{:name}}
+          <span>{{:name}}</span>
           <div style="float:right">
             <button data-act="edit" type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil"></span></button>
             <button data-act="remove" type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-trash"></span></button>
