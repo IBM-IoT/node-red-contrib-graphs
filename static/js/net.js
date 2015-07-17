@@ -67,6 +67,12 @@ App.Net = ( function() {
     ws.send( JSON.stringify( { m : "sub" , id : datasources } ) );
   }
 
+  function unsubscribeFromDatasources( datasources )
+  {
+    if( ws === null ) return;
+    ws.send( JSON.stringify( { m : "unsub" , id : datasources } ) );
+  }
+
   function requestHistoryData( id , start , end )
   {
     if( ws === null ) return;
@@ -84,6 +90,7 @@ App.Net = ( function() {
   return {
     createConnection : createConnection,
     subscribeToDatasources : subscribeToDatasources,
+    unsubscribeFromDatasources : unsubscribeFromDatasources,
     requestHistoryData : requestHistoryData
   };
 
