@@ -37,7 +37,6 @@ body {
 }
 
 #gridList li {
-  overflow: hidden;
   position: absolute;
   -moz-transition: top 0.2s,
                    left 0.2s;
