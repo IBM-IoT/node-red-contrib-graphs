@@ -61,25 +61,32 @@ App.Pages.Charts = ( function() {
 
       for( i = 0; i < chart.datasources.length; i++ )
       {
-        modalAddDatasource( chart.datasources[i] , datasources[ chart.datasources[i] ].name );
+        modalAddDatasource( chart.datasources[i] , datasources[ chart.datasources[i].id ].name );
 
         // TODO: Oh God fix this!
-        $datasourceDropdown.find( 'a[data-dsid="' + chart.datasources[i] + '"]' ).parent().remove();
+        $datasourceDropdown.find( 'a[data-dsid="' + chart.datasources[i].id + '"]' ).parent().remove();
       }
     }
 
     $modal.modal( "show" );
   }
 
-  function modalAddDatasource( id , name )
+  function modalAddDatasource( datasource , name )
   {
     dsData = {
-      id : id,
-      name : name
+      id : datasource.id,
+      name : name,
+      safe_id : datasource.id.replace( "." , "_" )
     };
 
     var template = $.templates( "#tmpl_ChartDatasource" );
-    $( "#chartDatasourceList" ).append( template.render( dsData ) );
+    var $datasource = $( template.render( dsData ) );
+    $( "#chartDatasourceList" ).append( $datasource );
+
+    if( datasource.hasOwnProperty( "config" ) )
+    {
+      $datasource.find( "#label_" + dsData.safe_id ).val( datasource.config.label );
+    }
   }
 
   function createNewChartClick( event )
@@ -104,7 +111,7 @@ App.Pages.Charts = ( function() {
     event.stopPropagation();
     event.preventDefault();
 
-    modalAddDatasource( $( this ).attr( "data-dsid" ) , $( this ).text().trim() );
+    modalAddDatasource( { id: $( this ).attr( "data-dsid" ) } , $( this ).text().trim() );
     $( this ).remove();
   }
 
@@ -169,7 +176,22 @@ App.Pages.Charts = ( function() {
 
     for( i = 0; i < $datasources.length; i++ )
     {
-      chart.datasources.push( $( $datasources[i] ).attr( "data-dsid" ) );
+      var $datasource = $( $datasources[i] );
+
+      var datasource = {
+        id : $datasource.attr( "data-dsid" ),
+        config : {}
+      };
+
+      var safeid = datasource.id.replace( "." , "_" );
+
+      datasource.config.label = $datasource.find( "#label_" + safeid ).val().trim();
+      if( !datasource.config.label )
+      {
+        datasource.config.label = $datasource.attr( "data-dsname" );
+      }
+
+      chart.datasources.push( datasource );
     }
 
     var $listItem;
@@ -303,20 +325,23 @@ App.Pages.Charts = ( function() {
       var chartDatasources = [] , datasource;
       for( i = 0; i < chart.datasources.length; i++ )
       {
-        datasource = App.Dashboard.currentDashboard.getDatasource( chart.datasources[i] );
+        datasource = App.Dashboard.currentDashboard.getDatasource( chart.datasources[i].id );
         if( datasource === null )
         {
-          datasource = new App.Datasource( chart.datasources[i] );
+          datasource = new App.Datasource( chart.datasources[i].id );
           App.Dashboard.currentDashboard.addDatasource( datasource );
         }
 
-        chartDatasources.push( datasource );
+        chartDatasources.push( {
+          datasource : datasource,
+          config : chart.datasources[i].config
+        } );
       }
 
       var newChart = new ChartPlugin( $container[0] , chartDatasources , chart.config , [] );
       for( i = 0; i < chartDatasources.length; i++ )
       {
-        chartDatasources[i].addChart( id , i , newChart );
+        chartDatasources[i].datasource.addChart( id , i , newChart );
       }
 
       App.Dashboard.currentDashboard.chartSettings[ id ] = chart;
