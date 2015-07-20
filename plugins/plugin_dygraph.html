@@ -21,7 +21,7 @@
         var now = ( new Date() ).getTime();
         for( var i = 0; i < this.datasources.length; i++ )
         {
-          this.datasources[i].requestHistoryData( now - 2000 , now - this.config.history );
+          this.datasources[i].datasource.requestHistoryData( now - 2000 , now - this.config.history );
         }
       }
     };
@@ -43,18 +43,11 @@
       {
         if( this.graph === null )
         {
-          var graphLabels = null;
-          if( this.config.hasOwnProperty( "labels" ) )
+          var graphLabels = [ "Time" ];
+
+          for( var i = 0; i < this.datasources.length; i++ )
           {
-            graphLabels = this.config.labels;
-          }
-          else
-          {
-            graphLabels = [ "Time" ];
-            for( var i = 0; i < this.datasources.length; i++ )
-            {
-              graphLabels.push( "Data #" + ( i + 1 ) );
-            }
+            graphLabels.push( this.datasources[i].config.label );
           }
 
           $( this.container ).empty();

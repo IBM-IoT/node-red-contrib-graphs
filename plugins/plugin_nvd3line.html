@@ -39,7 +39,7 @@
       {
         this.data.push( {
           values : [],
-          key : "Data #" + ( i + 1 )
+          key : this.datasources[i].config.label
         } );
       }
 
@@ -50,7 +50,7 @@
       var now = ( new Date() ).getTime();
       for( i = 0; i < this.datasources.length; i++ )
       {
-        this.datasources[i].requestHistoryData( now - 2000 , now - 24000 );
+        this.datasources[i].datasource.requestHistoryData( now - 2000 , now - 24000 );
       }
     };
 
