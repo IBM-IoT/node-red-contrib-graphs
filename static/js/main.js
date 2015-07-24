@@ -24,13 +24,22 @@ App.Main = ( function() {
         App.Datasource.datasources = _datasources[0];
         var dashboards = App.Dashboard.dashboards = _settings;
 
-        var container = $( "#dashboardPage" );
-        for( var i = 0; i < dashboards.length; i++ )
-        {
-          container.append( '<p><button type="button" class="btn btn-default" data-dash="' + i + '">' + dashboards[i].name + '</button></p>' );
-        }
 
-        container.find( "button" ).on( "click" , dashButtonClick );
+        var $container = $( "#dashboardPage" );
+
+        if( dashboards.length > 0 )
+        {
+          for( var i = 0; i < dashboards.length; i++ )
+          {
+            $container.append( '<p><button type="button" class="btn btn-default" data-dash="' + i + '">' + dashboards[i].name + '</button></p>' );
+          }
+
+          $container.find( "button" ).on( "click" , dashButtonClick );
+        }
+        else
+        {
+          $container.append( '<div class="alert alert-info">No dashboards available.</div>' );
+        }
 
       } );
     } ).fail( function() {
