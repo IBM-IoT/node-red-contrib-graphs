@@ -33,6 +33,7 @@ $( document ).on( "ready" , function() {
 
   App.Main.init();
 
+  App.Pages.Dashboards.init();
   App.Pages.Charts.init();
 
 } );

@@ -72,9 +72,19 @@ App.Dashboard.prototype.serialize = function() {
   return data;
 };
 
-App.Dashboard.dashboards = null;
+App.Dashboard.dashboards = [];
 App.Dashboard.currentDashboard = null;
 
 App.Dashboard.getDashboard = function( id ) {
   return App.Dashboard.dashboards.hasOwnProperty( id ) ? App.Dashboard.dashboards[ id ] : null;
+};
+
+App.Dashboard.addDashboard = function( dashboard ) {
+  var id = App.Dashboard.dashboards.length;
+  App.Dashboard.dashboards.push( dashboard );
+  return id;
+};
+
+App.Dashboard.removeDashboard = function( id ) {
+  App.Dashboard.dashboards.splice( id , 1 );
 };

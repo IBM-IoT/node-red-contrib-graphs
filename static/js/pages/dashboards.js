@@ -6,7 +6,22 @@ App.Pages.Dashboards = ( function() {
 
   function dashButtonClick()
   {
-    var id = $( this ).attr( "data-dash" );
+    var id = $( this ).attr( "data-open" );
+    if( id !== undefined )
+    {
+      openDashboard( id );
+    }
+    else
+    {
+      id = $( this ).attr( "data-remove" );
+      App.Dashboard.removeDashboard( id );
+      App.Settings.saveSettings();
+      populateDashboardList( App.Dashboard.dashboards );
+    }
+  }
+
+  function openDashboard( id )
+  {
     var dashboard = App.Dashboard.getDashboard( id );
     if( dashboard === null ) return;
 
@@ -17,6 +32,52 @@ App.Pages.Dashboards = ( function() {
     } );
   }
 
+  function createNewDashboardClick( event )
+  {
+    event.preventDefault();
+    openModal();
+  }
+
+  function dashboardDoneClick( event )
+  {
+    var errors = [];
+
+    var dashboardName = $( "#dashboardName" ).val().trim();
+
+    if( dashboardName.length < 1 ) errors.push( "Please enter a name." );
+
+    if( errors.length > 0 )
+    {
+      $alertBox = $( "#dashboardError" );
+      $alertBox.html( errors.join( "<br>" ) );
+      $alertBox.show();
+      return;
+    }
+
+    var dashboard = new App.Dashboard( dashboardName );
+
+    var dashid = App.Dashboard.addDashboard( dashboard );
+    App.Settings.saveSettings();
+    $( "#dashboardModal" ).modal( "hide" );
+    openDashboard( dashid );
+  }
+
+  function openModal()
+  {
+    var $modal = $( "#dashboardModal" );
+
+    $( "#dashboardError" ).hide();
+    $( "#dashboardName" ).val( "" );
+
+    $modal.modal( "show" );
+  }
+
+  function init()
+  {
+    $( "#createNewDashboard" ).on( "click" , createNewDashboardClick );
+    $( "#dashboardDone" ).on( "click" , dashboardDoneClick );
+  }
+
   function populateDashboardList( dashboards )
   {
     var $container = $( "#dashboardPage" );
@@ -24,10 +85,8 @@ App.Pages.Dashboards = ( function() {
 
     if( dashboards.length > 0 )
     {
-      for( var i = 0; i < dashboards.length; i++ )
-      {
-        $container.append( '<p><button type="button" class="btn btn-default" data-dash="' + i + '">' + dashboards[i].name + '</button></p>' );
-      }
+      var template = $.templates( "#tmpl_dashboardItems" );
+      $container.append( template.render( dashboards ) );
 
       $container.find( "button" ).on( "click" , dashButtonClick );
     }
@@ -38,6 +97,7 @@ App.Pages.Dashboards = ( function() {
   }
 
   return {
+    init : init,
     populateDashboardList : populateDashboardList
   };
 
