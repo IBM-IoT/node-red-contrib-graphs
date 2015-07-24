@@ -6,9 +6,24 @@ var express = require( "express" );
 var app = express();
 
 var settings = {};
+var cfgDir;
 
 function init()
 {
+  cfgDir = __dirname + "/.dash";
+
+  try
+  {
+    fs.mkdirSync( cfgDir );
+  }
+  catch( e )
+  {
+    if( e.code != "EEXIST" )
+    {
+      console.error( "Unable to create .dash dir in " + __dirname );
+    }
+  }
+
   app.get( "/settings" , function( request , response ) {
 
     response.end( JSON.stringify( getSettings( "default" ) ) );
@@ -80,7 +95,7 @@ function saveSettings( id )
 
 function getSettingsFilename( id )
 {
-  return __dirname + "/.dash/config_" + id + ".json";
+  return cfgDir + "/config_" + id + ".json";
 }
 
 module.exports = {
