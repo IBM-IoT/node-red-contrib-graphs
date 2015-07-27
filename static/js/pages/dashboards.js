@@ -14,9 +14,12 @@ App.Pages.Dashboards = ( function() {
     else
     {
       id = $( this ).attr( "data-remove" );
-      App.Dashboard.removeDashboard( id );
-      App.Settings.saveSettings();
-      populateDashboardList( App.Dashboard.dashboards );
+      var name = $( this ).siblings( "button" ).text();
+      App.Modal.show( "Remove " + name + "?" , "" , function() {
+        App.Dashboard.removeDashboard( id );
+        App.Settings.saveSettings();
+        populateDashboardList( App.Dashboard.dashboards );
+      } );
     }
   }
 
