@@ -31,7 +31,7 @@ App.Pages.Charts = ( function() {
     var chartPlugins = App.Plugins.getAllPlugins();
     for( key in chartPlugins )
     {
-      $pluginDropdown.append( '<li><a data-pluginid="' + key + '" href="#">' + key + '</a></li>' );
+      $pluginDropdown.append( '<li><a data-pluginid="' + key + '" href="#">' + chartPlugins[ key ].display_name + '</a></li>' );
     }
 
     // Build datasources dropdown
@@ -59,7 +59,7 @@ App.Pages.Charts = ( function() {
       $modalTitle.text( "Edit Chart" );
 
       $( "#chartName" ).val( chart.name );
-      $( "#chartPluginsButton" ).html( chart.chartPlugin + ' <span class="caret"></span>' );
+      $( "#chartPluginsButton" ).html( App.Plugins.getChart( chart.chartPlugin ).display_name + ' <span class="caret"></span>' );
       $( "#chartPlugins" ).attr( "data-pluginid" , chart.chartPlugin );
 
       for( i = 0; i < chart.datasources.length; i++ )
@@ -186,9 +186,9 @@ App.Pages.Charts = ( function() {
         config : {}
       };
 
-      var safeid = datasource.id.replace( "." , "_" );
+      var uid = $datasource.attr( "data-uid" );
 
-      datasource.config.label = $datasource.find( "#label_" + safeid ).val().trim();
+      datasource.config.label = $( "#nds" + uid + "-label" ).val().trim();
       if( !datasource.config.label )
       {
         datasource.config.label = $datasource.attr( "data-dsname" );
@@ -325,6 +325,7 @@ App.Pages.Charts = ( function() {
     var ChartPlugin = App.Plugins.getChart( chart.chartPlugin );
     if( ChartPlugin !== null )
     {
+      ChartPlugin = ChartPlugin.plugin;
       var chartDatasources = [] , datasource;
       for( i = 0; i < chart.datasources.length; i++ )
       {

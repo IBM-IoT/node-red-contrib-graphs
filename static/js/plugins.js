@@ -38,7 +38,7 @@ App.Plugins = ( function() {
     return $.when.apply( $ , dependencyDeferreds );
   }
 
-  function registerChartType( id , chart , dependencies )
+  function registerChartType( id , chart , options )
   {
     if( chartTypes.hasOwnProperty( id ) )
     {
@@ -46,13 +46,24 @@ App.Plugins = ( function() {
       return;
     }
 
-    if( $.isArray( dependencies ) && dependencies.length > 0 )
+    options = options || {};
+
+    if( options.hasOwnProperty( "dependencies" ) &&
+        $.isArray( options.dependencies ) &&
+        options.dependencies.length > 0 )
     {
       // TODO: Watch out for duplicate entries
-      chartDependencies = chartDependencies.concat( dependencies );
+      chartDependencies = chartDependencies.concat( options.dependencies );
     }
 
-    chartTypes[ id ] = chart;
+    var plugin = {
+      display_name : options.display_name || id,
+      plugin : chart,
+      chartConfig : options.chartConfig || {},
+      datasourceConfig : options.datasourceConfig || {}
+    };
+
+    chartTypes[ id ] = plugin;
   }
 
   function getChart( id )
