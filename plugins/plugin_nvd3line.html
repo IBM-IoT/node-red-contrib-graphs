@@ -97,10 +97,13 @@
       }
     };
 
-    App.Plugins.registerChartType( "nvd3line" , NVD3Line , [
-      "https://cdn.rawgit.com/novus/nvd3/v1.7.1/build/nv.d3.min.js",
-      "https://cdn.rawgit.com/novus/nvd3/v1.7.1/build/nv.d3.css"
-    ] );
+    App.Plugins.registerChartType( "nvd3line" , NVD3Line , {
+      dependencies : [
+        "https://cdn.rawgit.com/novus/nvd3/v1.7.1/build/nv.d3.min.js",
+        "https://cdn.rawgit.com/novus/nvd3/v1.7.1/build/nv.d3.css"
+      ],
+      display_name : "NVD3 Line"
+    } );
 
   } )();
 </script>

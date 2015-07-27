@@ -163,9 +163,23 @@
       return newData;
     };
 
-    App.Plugins.registerChartType( "dygraph" , MyGraph , [
-      "https://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"
-    ] );
+    App.Plugins.registerChartType( "dygraph" , MyGraph , {
+      dependencies : [
+        "https://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"
+      ],
+      display_name : "DyGraph"
+    } );
 
   } )();
+</script>
+
+<script type="text/x-dash" data-template-name="dygraph">
+  <div class="form-group">
+    <label for="chart-xLabel">X Axis Label</label>
+    <input type="text" id="chart-xLabel">
+  </div>
+  <div class="form-group">
+    <label for="chart-yLabel">X Axis Label</label>
+    <input type="text" id="chart-yLabel">
+  </div>
 </script>
