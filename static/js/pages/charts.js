@@ -8,9 +8,12 @@ App.Pages.Charts = ( function() {
   var DEFAULT_CHART_HEIGHT = 1;
 
   var editingChart = null;
+  var datasourceNextID = 0;
 
   function openChartModal( chartid )
   {
+    datasourceNextID = 0;
+
     var chart = ( chartid === undefined ? null : App.Dashboard.currentDashboard.chartSettings[ chartid ] );
     if( chart !== null ) editingChart = chartid;
 
@@ -76,7 +79,7 @@ App.Pages.Charts = ( function() {
     dsData = {
       id : datasource.id,
       name : name,
-      safe_id : datasource.id.replace( "." , "_" )
+      uid : datasourceNextID++
     };
 
     var template = $.templates( "#tmpl_ChartDatasource" );
@@ -85,7 +88,7 @@ App.Pages.Charts = ( function() {
 
     if( datasource.hasOwnProperty( "config" ) )
     {
-      $datasource.find( "#label_" + dsData.safe_id ).val( datasource.config.label );
+      $datasource.find( "#nds" + dsData.uid + "-label" ).val( datasource.config.label );
     }
   }
 

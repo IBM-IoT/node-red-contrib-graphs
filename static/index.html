@@ -143,7 +143,7 @@
     </script>
 
     <script id="tmpl_ChartDatasource" type="text/x-jsrender">
-      <div data-dsid="{{:id}}" data-dsname="{{:name}}" class="panel panel-default panel-small">
+      <div data-dsid="{{:id}}" data-dsname="{{:name}}" data-uid="{{:uid}}" class="panel panel-default panel-small">
         <div class="panel-heading">
           <button data-act="config" type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-cog"></span></button>
           {{:name}}
@@ -151,7 +151,7 @@
         </div>
         <div class="panel-body" style="display:none">
           <div class="form-group">
-            <input id="label_{{:safe_id}}" class="form-control" type="text" placeholder="Label">
+            <input id="nds{{:uid}}-label" class="form-control" type="text" placeholder="Label">
           </div>
         </div>
       </div>
