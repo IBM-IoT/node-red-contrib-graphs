@@ -57,6 +57,7 @@ App.Plugins = ( function() {
     }
 
     var plugin = {
+      id : id,
       display_name : options.display_name || id,
       plugin : chart,
       chartConfig : options.chartConfig || {},
