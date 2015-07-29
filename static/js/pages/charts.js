@@ -8,14 +8,19 @@ App.Pages.Charts = ( function() {
   var DEFAULT_CHART_HEIGHT = 1;
 
   var editingChart = null;
+  var selectedPlugin = null;
   var datasourceNextID = 0;
+
+  var $datasourceConfigTemplate = null;
 
   function openChartModal( chartid )
   {
+    selectedPlugin = null;
     datasourceNextID = 0;
+    $datasourceConfigTemplate = null;
 
     var chart = ( chartid === undefined ? null : App.Dashboard.currentDashboard.chartSettings[ chartid ] );
-    if( chart !== null ) editingChart = chartid;
+    editingChart = chart;
 
     var key, i;
 
@@ -45,6 +50,7 @@ App.Pages.Charts = ( function() {
     }
 
     $( "#chartDatasourceList" ).empty();
+    $( "#chartPluginConfig" ).empty();
 
     if( chart === null )
     {
@@ -52,7 +58,6 @@ App.Pages.Charts = ( function() {
 
       $( "#chartName" ).val( "" );
       $( "#chartPluginsButton" ).html( 'Select plugin <span class="caret"></span>' );
-      $( "#chartPlugins" ).removeAttr( "data-pluginid" );
     }
     else
     {
@@ -60,7 +65,7 @@ App.Pages.Charts = ( function() {
 
       $( "#chartName" ).val( chart.name );
       $( "#chartPluginsButton" ).html( App.Plugins.getChart( chart.chartPlugin ).display_name + ' <span class="caret"></span>' );
-      $( "#chartPlugins" ).attr( "data-pluginid" , chart.chartPlugin );
+      selectedPlugin = App.Plugins.getChart( chart.chartPlugin );
 
       for( i = 0; i < chart.datasources.length; i++ )
       {
@@ -69,6 +74,8 @@ App.Pages.Charts = ( function() {
         // TODO: Oh God fix this!
         $datasourceDropdown.find( 'a[data-dsid="' + chart.datasources[i].id + '"]' ).parent().remove();
       }
+
+      modalLoadPluginConfig( chartPlugins[ chart.chartPlugin ] );
     }
 
     $modal.modal( "show" );
@@ -90,6 +97,71 @@ App.Pages.Charts = ( function() {
     {
       $datasource.find( "#nds" + dsData.uid + "-label" ).val( datasource.config.label );
     }
+
+    if( selectedPlugin !== null )
+    {
+      modalLoadPluginDatasourceConfig( $( "#ds" + dsData.uid + "-config" ) , selectedPlugin , datasource );
+    }
+  }
+
+  function modalLoadPluginConfig( plugin )
+  {
+    var chart = null;
+    if( editingChart !== null && editingChart.chartPlugin == plugin.id )
+    {
+      chart = editingChart;
+    }
+
+    var $container = $( "#chartPluginConfig" );
+    $container.empty();
+
+    var $template = $( 'script[data-chart-config="' + plugin.id + '"]' );
+    if( $template.length > 0 )
+    {
+      $container.html( $template.text() );
+
+      if( chart !== null )
+      {
+        for( var key in plugin.chartConfig )
+        {
+          if( chart.config.hasOwnProperty( key ) )
+          {
+            var $input = $container.find( '[data-prop="' + key + '"]' );
+            setInputValue( $input , chart.config[ key ] );
+          }
+        }
+      }
+    }
+  }
+
+  function modalLoadPluginDatasourceConfig( $container , plugin , datasource )
+  {
+    $datasourceConfigTemplate = $( 'script[data-datasource-config="' + plugin.id + '"]' );
+    if( $datasourceConfigTemplate.length < 1 ) $datasourceConfigTemplate = null;
+
+    var chart = null;
+    if( editingChart !== null && editingChart.chartPlugin == plugin.id )
+    {
+      chart = editingChart;
+    }
+
+    $container.empty();
+    if( $datasourceConfigTemplate !== null )
+    {
+      $container.html( $datasourceConfigTemplate.text() );
+
+      if( chart !== null && datasource && datasource.hasOwnProperty( "config" ) )
+      {
+        for( var key in plugin.datasourceConfig )
+        {
+          if( datasource.config.hasOwnProperty( key ) )
+          {
+            var $input = $container.find( '[data-prop="' + key + '"]' );
+            setInputValue( $input , datasource.config[ key ] );
+          }
+        }
+      }
+    }
   }
 
   function createNewChartClick( event )
@@ -103,10 +175,21 @@ App.Pages.Charts = ( function() {
     event.preventDefault();
 
     var id = $( this ).attr( "data-pluginid" );
+    if( selectedPlugin !== null && id == selectedPlugin.id ) return;
+    selectedPlugin = App.Plugins.getChart( id );
+
     var name = $( this ).text();
-    $dropdownBtn = $( "#chartPlugins" ).siblings( "button" );
-    $( "#chartPlugins" ).attr( "data-pluginid" , id );
-    $dropdownBtn.html( name + ' <span class="caret"></span>' );
+    $( "#chartPlugins" ).siblings( "button" ).html( name + ' <span class="caret"></span>' );
+
+    modalLoadPluginConfig( selectedPlugin );
+
+    var $datasources = $( "#chartDatasourceList > div" );
+    for( var i = 0; i < $datasources.length; i++ )
+    {
+      var $datasource = $( $datasources[i] );
+      var $datasourceConfig = $( '#ds' + $datasource.attr( 'data-uid' ) + '-config' );
+      modalLoadPluginDatasourceConfig( $datasourceConfig , selectedPlugin );
+    }
   }
 
   function chartDatasourceClick( event )
@@ -141,19 +224,18 @@ App.Pages.Charts = ( function() {
 
   function chartDoneClick()
   {
-    var id = genRandomID(),
-        chart = {},
-        i;
+    var chart,
+        i, key,
+        $input;
 
     // Validate
     var errors = [];
 
     var chartName = $( "#chartName" ).val().trim();
-    var chartPlugin = $( "#chartPlugins" ).attr( "data-pluginid" );
-    $datasources = $( "#chartDatasourceList" ).find( "div[data-dsid]" );
+    var $datasources = $( "#chartDatasourceList > div" );
 
     if( chartName.length < 1 ) errors.push( "Please enter a name." );
-    if( chartPlugin === undefined ) errors.push( "Please select a plugin." );
+    if( selectedPlugin === null ) errors.push( "Please select a plugin." );
     if( $datasources.length < 1 ) errors.push( "Please add at least one datasource." );
 
     if( errors.length > 0 )
@@ -166,12 +248,17 @@ App.Pages.Charts = ( function() {
 
     if( editingChart !== null )
     {
-      id = editingChart;
-      chart = App.Dashboard.currentDashboard.chartSettings[ id ];
+      chart = editingChart;
+    }
+    else
+    {
+      chart = {
+        id : genRandomID()
+      };
     }
 
     chart.name = chartName;
-    chart.chartPlugin = chartPlugin;
+    chart.chartPlugin = selectedPlugin.id;
     chart.datasources = [];
     chart.config = {
       history : 1200000
@@ -194,7 +281,35 @@ App.Pages.Charts = ( function() {
         datasource.config.label = $datasource.attr( "data-dsname" );
       }
 
+      var $dsConfig = $( "#ds" + uid + "-config" );
+      for( key in selectedPlugin.datasourceConfig )
+      {
+        $input = $dsConfig.find( '[data-prop="' + key + '"]' );
+        if( $input.length > 0 )
+        {
+          datasource.config[ key ] = getInputValue( $input );
+        }
+        else
+        {
+          datasource.config[ key ] = selectedPlugin.datasourceConfig[ key ].default;
+        }
+      }
+
       chart.datasources.push( datasource );
+    }
+
+    var $chartConfig = $( "#chartPluginConfig" );
+    for( key in selectedPlugin.chartConfig )
+    {
+      $input = $chartConfig.find( '[data-prop="' + key + '"]' );
+      if( $input.length > 0 )
+      {
+        chart.config[ key ] = getInputValue( $input );
+      }
+      else
+      {
+        chart.config[ key ] = selectedPlugin.chartConfig[ key ].default;
+      }
     }
 
     var $listItem;
@@ -203,26 +318,26 @@ App.Pages.Charts = ( function() {
     {
       var template = $.templates( "#tmpl_GridContainer" );
       $listItem = $( template.render( {
-        id : id,
+        id : chart.id,
         name : chart.name
       } ) );
 
       $( "#gridList" ).gridList( "add" , $listItem , DEFAULT_CHART_WIDTH , DEFAULT_CHART_HEIGHT );
-      loadChart( id , chart , $listItem.find( ".gridItemContent" ) );
+      loadChart( chart.id , chart , $listItem.find( ".gridItemContent" ) );
     }
     else
     {
-      $listItem = $( '#gridList li[data-id="' + editingChart + '"]' );
+      $listItem = $( '#gridList li[data-id="' + chart.id + '"]' );
       $listItem.find( ".gridItemHeader > span" ).text( chart.name );
 
       // For now, re-create the chart to change settings...
       // TODO: Allow chart plugins to handle settings changes
 
-      App.Dashboard.currentDashboard.removeChart( id );
+      App.Dashboard.currentDashboard.removeChart( chart.id );
 
       $container = $listItem.find( ".gridItemContent" );
       $container.empty();
-      loadChart( id , chart , $container );
+      loadChart( chart.id , chart , $container );
     }
 
     App.Dashboard.currentDashboard.subscribeToNewDatasources();
@@ -364,6 +479,27 @@ App.Pages.Charts = ( function() {
     var id = "";
     for( var i = 0; i < len; i++ ) id += chars[ Math.floor( Math.random() * 62 ) ];
     return id;
+  }
+
+  function getInputValue( $input )
+  {
+    if( $input.attr( "type" ) === "checkbox" )
+    {
+      return $input.prop( "checked" );
+    }
+    return $input.val().trim();
+  }
+
+  function setInputValue( $input , value )
+  {
+    if( $input.attr( "type" ) === "checkbox" )
+    {
+      $input.prop( "checked" , value );
+    }
+    else
+    {
+      $input.val( value );
+    }
   }
 
   function init()
