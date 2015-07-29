@@ -43,34 +43,45 @@
       {
         if( this.graph === null )
         {
-          var graphLabels = [ "Time" ];
+          var graphLabels = [ "Time" ],
+              i;
 
-          for( var i = 0; i < this.datasources.length; i++ )
+
+
+          var options = {
+            connectSeparatedPoints : true,
+            drawPoints : false,
+            showRoller : true,
+            xlabel : this.config.xLabel,
+            ylabel : this.config.yLabel,
+            axisLabelColor : "#8d9194",
+            axisLineColor : "#8d9194",
+            gridLineColor : "#4d4e4f",
+            showRangeSelector : ( this.datasources.length === 1 ),
+            rangeSelectorPlotFillColor : "",
+            rangeSelectorPlotStrokeColor : "#c67a08",
+            labelsDivStyles : {
+              background : "rgba( 0 , 0 , 0 , 0.2 )",
+              color : "#EEE",
+              padding : "5px"
+            },
+            legend : "always",
+            colorValue : 0.7,
+            colorSaturation : 0.6
+          };
+
+          options.labels = [ "Time" ];
+          for( i = 0; i < this.datasources.length; i++ )
           {
-            graphLabels.push( this.datasources[i].config.label );
+            var label = this.datasources[i].config.label;
+            options.labels.push( label );
+            options[ label ] = {
+              fillGraph : this.datasources[i].config.area
+            };
           }
 
           $( this.container ).empty();
-          this.graph = new Dygraph( this.container , this.data , {
-              connectSeparatedPoints : true,
-              drawPoints : false,
-              showRoller : true,
-              labels : graphLabels,
-              axisLabelColor : "#8d9194",
-              axisLineColor : "#8d9194",
-              gridLineColor : "#4d4e4f",
-              showRangeSelector : ( this.datasources.length === 1 ),
-              rangeSelectorPlotFillColor : "",
-              rangeSelectorPlotStrokeColor : "#c67a08",
-              labelsDivStyles : {
-                background : "rgba( 0 , 0 , 0 , 0.2 )",
-                color : "#EEE",
-                padding : "5px"
-              },
-              legend : "always",
-              colorValue : 0.7,
-              colorSaturation : 0.6
-          } );
+          this.graph = new Dygraph( this.container , this.data , options );
 
           $( this.container ).find( 'input[type="text"]' ).addClass( "form-control" ).css( "width" , "50px" ).css( "height" , "25px" );
         }
@@ -167,19 +178,32 @@
       dependencies : [
         "https://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"
       ],
-      display_name : "DyGraph"
+      display_name : "DyGraph",
+      chartConfig : {
+        xLabel : { default : "" },
+        yLabel : { default : "" }
+      },
+      datasourceConfig : {
+        area : { default : false }
+      }
     } );
 
   } )();
 </script>
 
-<script type="text/x-dash" data-template-name="dygraph">
+<script type="text/x-dash" data-chart-config="dygraph">
   <div class="form-group">
-    <label for="chart-xLabel">X Axis Label</label>
-    <input type="text" id="chart-xLabel">
+    <label for="c-xLabel">X Axis Label</label>
+    <input class="form-control" type="text" id="c-xLabel" data-prop="xLabel">
   </div>
   <div class="form-group">
-    <label for="chart-yLabel">X Axis Label</label>
-    <input type="text" id="chart-yLabel">
+    <label for="c-yLabel">Y Axis Label</label>
+    <input class="form-control" type="text" id="c-yLabel" data-prop="yLabel">
+  </div>
+</script>
+
+<script type="text/x-dash" data-datasource-config="dygraph">
+  <div class="form-group">
+    <input type="checkbox" data-prop="area"> Fill area under graph
   </div>
 </script>
