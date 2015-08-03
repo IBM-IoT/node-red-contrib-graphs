@@ -42,7 +42,8 @@ App.Datasource.prototype.pushData = function( data ) {
   }
 };
 
-App.Datasource.prototype.requestHistoryData = function( start , end ) {
+// TODO: Flip start and end properly
+App.Datasource.prototype.requestHistoryData = function( end , start ) {
   if( this.end !== null )
   {
     if( end >= this.end ) return;

@@ -21,7 +21,7 @@
         var now = ( new Date() ).getTime();
         for( var i = 0; i < this.datasources.length; i++ )
         {
-          this.datasources[i].datasource.requestHistoryData( now - 2000 , now - this.config.history );
+          this.datasources[i].datasource.requestHistoryData( now - this.config.history , now - 2000 );
         }
       }
     };

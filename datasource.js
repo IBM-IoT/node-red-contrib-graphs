@@ -125,7 +125,8 @@ module.exports = function(RED)
         if( start > end )
         {
           this.historyRequests.push( client );
-          this.send( { payload : { start : start , end : end } } );
+          // TODO: Flip start and end properly
+          this.send( { payload : { start : end , end : start } } );
         }
       };
 
