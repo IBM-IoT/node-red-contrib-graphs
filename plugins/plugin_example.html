@@ -1,0 +1,100 @@
+<!-- The JavaScript part of the plugin -->
+<script type="text/javascript">
+
+  // Don't pollute the global scope
+  ( function() {
+
+    // Each plugin is a "class" that gets registered through the Plugins API
+
+    // Constructor:
+    // params
+    //  container - HTML Containing Element
+    //  datasources - An array of JSON Objects describing the datasources connected to this chart
+    //    datasources[].datasource - An App.Datasource object
+    //    datasources[].config - JSON object containing the datasource's configuration
+    //  config - A JSON object containing the chart's configuration
+    //  data - Initial data ( currently not used )
+    var ExamplePlugin = function( container , datasources , config , data ) {
+
+      // Create an inner container, and append it to the outer container provided by the application
+      this.container = $( '<div></div>' );
+      $( container ).append( this.container );
+
+      this.datasources = datasources;
+      // Go through all datasources
+      for( var i = 0; i < this.datasources.length; i++ )
+      {
+        var datasource = this.datasources[i];
+        // Output the datasource's label (name) and whether the custom property we defined (myDatasourceProp) was checked or not
+        this.container.append( 'Datasource #' + i + ': <strong>' + datasource.config.label + '</strong>' +
+                               ', myDatasourceProp checked: <strong>' + ( datasource.config.myDatasourceProp ? 'Yes' : 'No' ) + '</strong><br>' );
+      }
+
+      // Output the value of the custom chart property we defined: myProp
+      this.container.append( '<br>myProp: <strong>' + config.myProp + '</strong>' );
+    };
+
+    // plugin.pushData
+    // params
+    //  index - Zero-based index of the datasource the data is from ( See datasource array passed to constructor )
+    //  data - One datapoint or an array of datapoints in the same format the datasource node works with.
+    //         Each datapoint is a 2-element array [ timestamp , value ].
+    ExamplePlugin.prototype.pushData = function( index , data ) {
+      console.log( "[ExamplePlugin][" + index + "]" , data );
+    };
+
+    // Set some plugin options
+    var pluginOptions = {
+      // display_name - Pretty name for display purposes. If omitted, the plugin's unique ID will be used.
+      display_name : "Example Plugin",
+      // chartConfig - A JSON Object describing the plugin's chart-level configurable properties
+      chartConfig : {
+        // The JSON key will be used to identify the property
+        myProp : {
+          // default - The default value of the property
+          default : ""
+        }
+      },
+      // datasourceConfig - A JSON Object describing the plugin's datasource-level configurable properties
+      datasourceConfig : {
+        // Same as chartConfig
+        myDatasourceProp : {
+          // For checkboxes, use boolean values
+          default : false
+        }
+      }
+    };
+
+    // Register the plugin
+    App.Plugins.registerChartType(
+      "example_plugin", // Plugin's unique ID
+      ExamplePlugin,    // Plugin "class" defined above
+      pluginOptions    // Plugin options
+    );
+
+  } )();
+
+</script>
+
+<!-- The contents of the following script tag will be used to populate the chart-level part of the chart's configuration panel.
+     For this to work, the property "data-chart-config" needs to be set to the unique ID of the plugin, in this case "example_plugin"
+
+     In order to connect an input (select/textarea/etc.) element to a property defined in the JavaScript above, you need to
+     set the input's "data-prop" property to the name (key) of the property as defined in pluginOptions.chartConfig -->
+<script type="text/x-dash" data-chart-config="example_plugin">
+  <div class="form-group">
+    <label>My Property</label>
+    <input class="form-control" type="text" data-prop="myProp">
+  </div>
+</script>
+
+<!-- The contents of the following script tag will be used to populate each datasource configuration panel inside the chart's configuration panel.
+     For this to work, the property "data-datasource-config" needs to be set to the unique ID of the plugin, in this case "example_plugin"
+
+     As with chart properties (see above), the "data-prop" property of the input element needs to be set to the name of the property as defined
+     in pluginOptions.datasourceConfig -->
+<script type="text/x-dash" data-datasource-config="example_plugin">
+  <div class="form-group">
+    <input type="checkbox" data-prop="myDatasourceProp"> Check me (or not, your choice(...or is it?))
+  </div>
+</script>
