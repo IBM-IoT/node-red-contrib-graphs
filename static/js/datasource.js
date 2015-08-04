@@ -54,4 +54,15 @@ App.Datasource.prototype.requestHistoryData = function( end , start ) {
   App.Net.requestHistoryData( this.id , start , end );
 };
 
+App.Datasource.getDatasources = function() {
+  var dfd = $.Deferred();
+
+  $.getJSON( "api/datasources" ).done( function( datasources ) {
+    App.Datasource.datasources = datasources;
+    dfd.resolve();
+  } );
+
+  return dfd.promise();
+};
+
 App.Datasource.datasources = null;

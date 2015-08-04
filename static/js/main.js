@@ -6,10 +6,7 @@ App.Main = ( function() {
   function init()
   {
     App.Plugins.loadPlugins().done( function() {
-      $.when( $.getJSON( "api/datasources" ) , App.Settings.loadSettings() ).done( function( _datasources , _settings ) {
-
-        App.Datasource.datasources = _datasources[0];
-        App.Dashboard.dashboards = _settings;
+      $.when( App.Datasource.getDatasources() , App.Settings.loadSettings() ).done( function() {
         App.Pages.Dashboards.populateDashboardList( App.Dashboard.dashboards );
       } );
     } ).fail( function() {

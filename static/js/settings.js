@@ -26,11 +26,9 @@ App.Settings = ( function() {
   {
     var dfd = $.Deferred();
 
-    var settings = {};
     $.getJSON( "api/user/settings" ).done( function( data , status , xhr ) {
-      settings = data;
-    } ).always( function() {
-      dfd.resolve( parseSettings( settings ) );
+      App.Dashboard.dashboards = parseSettings( data );
+      dfd.resolve();
     } );
 
     return dfd.promise();
