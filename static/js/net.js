@@ -45,6 +45,7 @@ App.Net = ( function() {
       if( event.code === 1000 )
       {
         createConnection().done( function() {
+          App.Datasource.getDatasources();
           if( App.Dashboard.currentDashboard !== null )
           {
             App.Dashboard.currentDashboard.subscribeToAllDatasources();
