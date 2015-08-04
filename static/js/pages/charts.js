@@ -69,6 +69,8 @@ App.Pages.Charts = ( function() {
 
       for( i = 0; i < chart.datasources.length; i++ )
       {
+        if( !datasources.hasOwnProperty( chart.datasources[i].id ) ) continue;
+        
         modalAddDatasource( chart.datasources[i] , datasources[ chart.datasources[i].id ].name );
 
         // TODO: Oh God fix this!
