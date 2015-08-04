@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-graphs",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Node-RED graphing package. Contains a datasource node which handles historical data and live data streams, and a hackable visualization application designed to connect to the datasource nodes.",
   "main": "datasource.js",
   "scripts": {
