@@ -8,6 +8,14 @@
       $( container ).append( this.container );
 
       this.config = config;
+      this.limit = parseInt( this.config.dataLimit );
+      if( !isNaN( this.limit ) )
+      {
+        if( this.limit < 10 ) this.limit = 10;
+        this.limit *= datasources.length;
+      }
+      else this.limit = null;
+
       this.data = [];
       this.graph = null;
 
@@ -39,14 +47,18 @@
         this.addNewData( index , data );
       }
 
+      if( this.limit !== null && this.data.length > this.limit )
+      {
+        this.data.splice( 0 , this.data.length - this.limit );
+      }
+
+
       if( this.data.length > 1 )
       {
         if( this.graph === null )
         {
           var graphLabels = [ "Time" ],
               i;
-
-
 
           var options = {
             connectSeparatedPoints : true,
@@ -89,8 +101,6 @@
         {
           this.graph.updateOptions( { file : this.data } );
         }
-
-        $( this.container ).siblings( "span" ).text( "Count: " + this.data.length );
       }
     };
 
@@ -181,7 +191,8 @@
       display_name : "DyGraph",
       chartConfig : {
         xLabel : { default : "" },
-        yLabel : { default : "" }
+        yLabel : { default : "" },
+        dataLimit : { default : "" }
       },
       datasourceConfig : {
         area : { default : false }
@@ -199,6 +210,10 @@
   <div class="form-group">
     <label for="c-yLabel">Y Axis Label</label>
     <input class="form-control" type="text" id="c-yLabel" data-prop="yLabel">
+  </div>
+  <div class="form-group">
+    <label for="c-dataLimit">Data Limit (leave blank for no limit)</label>
+    <input class="form-control" type="text" id="c-dataLimit" data-prop="dataLimit">
   </div>
 </script>
 
