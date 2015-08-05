@@ -136,7 +136,6 @@ module.exports = function(RED)
         {
           if( this.clients[i].ws == ws )
           {
-            RED.log.info( "Client removed" );
             this.clients.splice( i , 1 );
             return;
           }

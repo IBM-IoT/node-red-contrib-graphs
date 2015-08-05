@@ -92,7 +92,10 @@ function handleWSConnection( ws )
   } );
 
   ws.on( "close" , function( code , message ) {
-    console.log( "WS Connection closed (" + code + ( message ? ", " + message : "" ) + ")" );
+    if( code != 1000 )
+    {
+      console.log( "WS Connection closed (" + code + ( message ? ", " + message : "" ) + ")" );
+    }
   } );
 
   ws.on( "error" , function( err ) {
