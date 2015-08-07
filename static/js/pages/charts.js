@@ -64,8 +64,8 @@ App.Pages.Charts = ( function() {
       $modalTitle.text( "Edit Chart" );
 
       $( "#chartName" ).val( chart.name );
-      $( "#chartPluginsButton" ).html( App.Plugins.getChart( chart.chartPlugin ).display_name + ' <span class="caret"></span>' );
-      selectedPlugin = App.Plugins.getChart( chart.chartPlugin );
+      $( "#chartPluginsButton" ).html( App.Plugins.getPlugin( chart.chartPlugin ).display_name + ' <span class="caret"></span>' );
+      selectedPlugin = App.Plugins.getPlugin( chart.chartPlugin );
 
       for( i = 0; i < chart.datasources.length; i++ )
       {
@@ -178,7 +178,7 @@ App.Pages.Charts = ( function() {
 
     var id = $( this ).attr( "data-pluginid" );
     if( selectedPlugin !== null && id == selectedPlugin.id ) return;
-    selectedPlugin = App.Plugins.getChart( id );
+    selectedPlugin = App.Plugins.getPlugin( id );
 
     var name = $( this ).text();
     $( "#chartPlugins" ).siblings( "button" ).html( name + ' <span class="caret"></span>' );
@@ -440,7 +440,7 @@ App.Pages.Charts = ( function() {
 
   function loadChart( id , chart , $container )
   {
-    var ChartPlugin = App.Plugins.getChart( chart.chartPlugin );
+    var ChartPlugin = App.Plugins.getPlugin( chart.chartPlugin );
     if( ChartPlugin !== null )
     {
       ChartPlugin = ChartPlugin.plugin;

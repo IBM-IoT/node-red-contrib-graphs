@@ -67,7 +67,7 @@ App.Plugins = ( function() {
     chartTypes[ id ] = plugin;
   }
 
-  function getChart( id )
+  function getPlugin( id )
   {
     return chartTypes.hasOwnProperty( id ) ? chartTypes[ id ] : null;
   }
@@ -80,7 +80,7 @@ App.Plugins = ( function() {
   return {
     loadPlugins : loadPlugins,
     registerChartType : registerChartType,
-    getChart : getChart,
+    getPlugin : getPlugin,
     getAllPlugins : getAllPlugins
   };
 
