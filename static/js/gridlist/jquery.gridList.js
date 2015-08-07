@@ -80,7 +80,25 @@
     add: function( element , w , h ) {
       this._updateElementData();
 
-      var nextPos = this.gridList.findPositionForItem( { x : 0 , y : 0 , w : w , h : h } , { x : 0 , y : 0 } );
+      var item;
+      if( this.options.vertical )
+      {
+        item = { x : 0 , y : 0 , w : h , h : w };
+      }
+      else
+      {
+        item = { x : 0 , y : 0 , w : w , h : h };
+      }
+
+      var nextPos = this.gridList.findPositionForItem( item , { x : 0 , y : 0 } );
+
+      if( this.options.vertical )
+      {
+        var temp = nextPos[1];
+        nextPos[1] = nextPos[0];
+        nextPos[0] = temp;
+      }
+
       element.attr( {
         "data-x" : nextPos[0],
         "data-y" : nextPos[1],
@@ -112,10 +130,24 @@
     _updateElementData: function() {
       for( var i = 0; i < this.items.length; i++ )
       {
-        this.items[i].$element.attr( "data-x" , this.items[i].x );
-        this.items[i].$element.attr( "data-y" , this.items[i].y );
-        this.items[i].$element.attr( "data-w" , this.items[i].w );
-        this.items[i].$element.attr( "data-h" , this.items[i].h );
+        if( this.options.vertical )
+        {
+          this.items[i].$element.attr( {
+            "data-x" : this.items[i].y,
+            "data-y" : this.items[i].x,
+            "data-w" : this.items[i].h,
+            "data-h" : this.items[i].w
+          } );
+        }
+        else
+        {
+          this.items[i].$element.attr( {
+            "data-x" : this.items[i].x,
+            "data-y" : this.items[i].y,
+            "data-w" : this.items[i].w,
+            "data-h" : this.items[i].h
+          } );
+        }
       }
     },
 
