@@ -26,7 +26,8 @@
       itemSelector: 'li[data-w]',
       widthHeightRatio: 1,
       dragAndDrop: true,
-      cellMargins : [ 10 , 10 ]
+      cellMargins : [ 10 , 10 ],
+      vertical : false
     },
 
     draggableDefaults: {
@@ -153,7 +154,10 @@
     _initGridList: function() {
       // Create instance of GridList (decoupled lib for handling the grid
       // positioning and sorting post-drag and dropping)
-      this.gridList = new GridList(this.items, {rows: this.options.rows});
+      this.gridList = new GridList(this.items, {
+        rows: this.options.rows,
+        vertical: this.options.vertical
+      } );
     },
 
     _bindEvents: function() {
@@ -228,14 +232,28 @@
           items = [],
           item;
       this.$items.each(function(i, element) {
-        items.push({
-          $element: $(element),
-          x: Number($(element).attr('data-x')),
-          y: Number($(element).attr('data-y')),
-          w: Number($(element).attr('data-w')),
-          h: Number($(element).attr('data-h')),
-          id: Number($(element).attr('data-id'))
-        });
+        if( _this.options.vertical )
+        {
+          items.push({
+            $element: $(element),
+            x: Number($(element).attr('data-y')),
+            y: Number($(element).attr('data-x')),
+            w: Number($(element).attr('data-h')),
+            h: Number($(element).attr('data-w')),
+            id: Number($(element).attr('data-id'))
+          });
+        }
+        else
+        {
+          items.push({
+            $element: $(element),
+            x: Number($(element).attr('data-x')),
+            y: Number($(element).attr('data-y')),
+            w: Number($(element).attr('data-w')),
+            h: Number($(element).attr('data-h')),
+            id: Number($(element).attr('data-id'))
+          });
+        }
       });
       return items;
     },
@@ -251,19 +269,41 @@
     },
 
     _calculateCellSize: function() {
-      this._cellHeight = Math.floor(this.$element.height() / this.options.rows);
-      this._cellWidth = this._cellHeight * this.options.widthHeightRatio;
+      if( this.options.vertical )
+      {
+        this._cellWidth = Math.floor( this.$element.width() / this.options.rows );
+        this._cellHeight = this._cellWidth * this.options.widthHeightRatio;
+      }
+      else
+      {
+        this._cellHeight = Math.floor(this.$element.height() / this.options.rows);
+        this._cellWidth = this._cellHeight * this.options.widthHeightRatio;
+      }
       if (this.options.heightToFontSizeRatio) {
         this._fontSize = this._cellHeight * this.options.heightToFontSizeRatio;
       }
     },
 
     _getItemWidth: function(item) {
-      return item.w * this._cellWidth - this.options.cellMargins[0];
+      if( this.options.vertical )
+      {
+        return item.h * this._cellWidth - this.options.cellMargins[0];
+      }
+      else
+      {
+        return item.w * this._cellWidth - this.options.cellMargins[0];
+      }
     },
 
     _getItemHeight: function(item) {
-      return item.h * this._cellHeight - this.options.cellMargins[1];
+      if( this.options.vertical )
+      {
+        return item.w * this._cellHeight - this.options.cellMargins[1];
+      }
+      else
+      {
+        return item.h * this._cellHeight - this.options.cellMargins[1];
+      }
     },
 
     _applySizeToItems: function() {
@@ -285,15 +325,33 @@
         if (this.items[i].move) {
           continue;
         }
-        this.items[i].$element.css({
-          left: this.items[i].x * this._cellWidth,
-          top: this.items[i].y * this._cellHeight
-        });
+        if( this.options.vertical )
+        {
+          this.items[i].$element.css({
+            left: this.items[i].y * this._cellWidth,
+            top: this.items[i].x * this._cellHeight
+          });
+        }
+        else
+        {
+          this.items[i].$element.css({
+            left: this.items[i].x * this._cellWidth,
+            top: this.items[i].y * this._cellHeight
+          });
+        }
       }
       // Update the width of the entire grid container with enough room on the
       // right to allow dragging items to the end of the grid.
-      this.$element.width(
-        (this.gridList.grid.length + this._widestItem) * this._cellWidth);
+      if( this.options.vertical )
+      {
+        this.$element.height(
+          (this.gridList.grid.length + this._widestItem) * this._cellHeight);
+      }
+      else
+      {
+        this.$element.width(
+          (this.gridList.grid.length + this._widestItem) * this._cellWidth);
+      }
     },
 
     _dragPositionChanged: function(newPosition) {
@@ -308,9 +366,18 @@
       var position = item.$element.position(),
           row,
           col;
-      position[0] -= this.$element.position().left;
-      col = Math.round(position.left / this._cellWidth);
-      row = Math.round(position.top / this._cellHeight);
+      position.left -= this.$element.position().left;
+
+      if( this.options.vertical )
+      {
+        row = Math.round(position.left / this._cellWidth);
+        col = Math.round(position.top / this._cellHeight);
+      }
+      else
+      {
+        col = Math.round(position.left / this._cellWidth);
+        row = Math.round(position.top / this._cellHeight);
+      }
       // Keep item position within the grid and don't let the item create more
       // than one extra column
       col = Math.max(col, 0);
@@ -321,12 +388,28 @@
     },
 
     _highlightPositionForItem: function(item) {
-      this.$positionHighlight.css({
+      this.$positionHighlight.css( {
         width: this._getItemWidth(item),
         height: this._getItemHeight(item),
-        left: item.x * this._cellWidth,
-        top: item.y * this._cellHeight
-      }).show();
+
+      } );
+
+      if( this.options.vertical )
+      {
+        this.$positionHighlight.css( {
+          left: item.y * this._cellWidth,
+          top: item.x * this._cellHeight
+        } );
+      }
+      else
+      {
+        this.$positionHighlight.css( {
+          left: item.x * this._cellWidth,
+          top: item.y * this._cellHeight
+        } );
+      }
+
+      this.$positionHighlight.show();
       if (this.options.heightToFontSizeRatio) {
         this.$positionHighlight.css('font-size', this._fontSize);
       }
