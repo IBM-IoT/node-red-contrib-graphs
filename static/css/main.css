@@ -26,17 +26,17 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
 }
 
 #gridList {
   position: relative;
   height: 100%;
   list-style: none;
+  padding: 0;
 }
 
 #gridList li {
+  padding: 0;
   position: absolute;
   -moz-transition: top 0.2s,
                    left 0.2s;
@@ -93,5 +93,5 @@ body {
 
 .panel.panel-small .panel-heading {
   font-size: 80%;
-  padding: 1px;  
+  padding: 1px;
 }

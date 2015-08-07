@@ -4,7 +4,7 @@ App.Pages = App.Pages || {};
 
 App.Pages.Charts = ( function() {
 
-  var DEFAULT_CHART_WIDTH = 4;
+  var DEFAULT_CHART_WIDTH = 2;
   var DEFAULT_CHART_HEIGHT = 1;
 
   var editingChart = null;
@@ -418,8 +418,8 @@ App.Pages.Charts = ( function() {
       $listItem.attr( {
         'data-w' : DEFAULT_CHART_WIDTH,
         'data-h' : DEFAULT_CHART_HEIGHT,
-        'data-x' : Math.floor( count / 3 ) * DEFAULT_CHART_WIDTH,
-        'data-y' : count % 3
+        'data-x' : ( count % 2 ) * DEFAULT_CHART_WIDTH,
+        'data-y' : Math.floor( count / 2 )
       } );
 
       $container.append( $listItem );
@@ -429,7 +429,9 @@ App.Pages.Charts = ( function() {
     }
 
     $container.gridList( {
-      rows : 3
+      rows : 4,
+      vertical : true,
+      widthHeightRatio : 0.65
     } , {
       handle : ".gridItemHeader",
       zIndex : 1000
