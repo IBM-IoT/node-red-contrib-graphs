@@ -50,29 +50,13 @@
       var now = ( new Date() ).getTime();
       for( i = 0; i < this.datasources.length; i++ )
       {
-        this.datasources[i].datasource.requestHistoryData( now - 24000 , now - 2000 );
+        this.datasources[i].datasource.requestHistoryData( i , now - 24000 , now - 2000 , this.pushHistoryData.bind( this ) );
       }
     };
 
     NVD3Line.prototype.pushData = function( index , data ) {
 
-      if( !$.isArray( data[0] ) ) data = [ data ];
-
-      var i;
-      if( this.data[index].values.length > 0 && data[ data.length - 1 ][0] < this.data[index].values[0].x )
-      {
-        for( i = data.length - 1; i >= 0; i-- )
-        {
-          this.data[index].values.unshift( { x : data[i][0] , y : data[i][1] } );
-        }
-      }
-      else
-      {
-        for( i = 0; i < data.length; i++ )
-        {
-          this.data[index].values.push( { x : data[i][0] , y : data[i][1] } );
-        }
-      }
+      this.data[ index ].values.push( { x : data.tstamp , y : data.data } );
 
       if( this.data[index].values.length > 1 )
       {
@@ -95,6 +79,13 @@
           this.graph.update();
         }
       }
+    };
+
+    NVD3Line.prototype.pushHistoryData = function( index , data ) {
+
+      for( var i = data.length - 1; i >= 0; i-- )
+        this.data[index].values.unshift( { x : data[i].tstamp , y : data[i].data } );
+
     };
 
     App.Plugins.registerChartType( "nvd3line" , NVD3Line , {

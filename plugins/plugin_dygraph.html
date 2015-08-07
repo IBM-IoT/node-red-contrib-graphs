@@ -29,29 +29,20 @@
         var now = ( new Date() ).getTime();
         for( var i = 0; i < this.datasources.length; i++ )
         {
-          this.datasources[i].datasource.requestHistoryData( now - this.config.history , now - 2000 );
+          this.datasources[i].datasource.requestHistoryData( i , now - this.config.history , now - 2000 , this.addHistoryData.bind( this ) );
         }
       }
     };
 
     MyGraph.prototype.pushData = function( index , data ) {
       if( index < 0 || index >= this.datasources.length ) return;
-      if( !$.isArray( data ) || data.length < 1 ) return;
 
-      if( $.isArray( data[0] ) )
-      {
-        this.addHistoryData( index , data );
-      }
-      else
-      {
-        this.addNewData( index , data );
-      }
+      this.data.push( this.createNewDatapoint( data.tstamp , index , data.data ) );
 
       if( this.limit !== null && this.data.length > this.limit )
       {
         this.data.splice( 0 , this.data.length - this.limit );
       }
-
 
       if( this.data.length > 1 )
       {
@@ -104,28 +95,14 @@
       }
     };
 
-    MyGraph.prototype.addNewData = function( index , data ) {
-      if( data.length < 1 ) return;
-      if( $.isArray( data[0] ) )
-      {
-        for( var i = 0; i < data.length; i++ )
-        {
-          this.addNewData( data[i] );
-        }
-        return;
-      }
-
-      this.data.push( this.createNewDatapoint( data[0] , index , data[1] ) );
-    };
-
     MyGraph.prototype.addHistoryData = function( index , data ) {
       var i,k;
 
-      if( this.data.length < 1 || data[ data.length - 1 ][0] < this.data[0][0].getTime() )
+      if( this.data.length < 1 || data[ data.length - 1 ].tstamp < this.data[0][0].getTime() )
       {
         for( i = data.length - 1; i >= 0; i-- )
         {
-          this.data.unshift( this.createNewDatapoint( data[i][0] , index , data[i][1] ) );
+          this.data.unshift( this.createNewDatapoint( data[i].tstamp , index , data[i].data ) );
         }
       }
       else
@@ -134,20 +111,20 @@
         i = this.findData( data[ data.length - 1 ][0] );
         while( i >= 0 && data.length > 0 )
         {
-          if( data[ data.length - 1 ][0] < this.data[i][0].getTime() )
+          if( data[ data.length - 1 ].tstamp < this.data[i][0].getTime() )
           {
             i--;
             continue;
           }
 
           var newData = data.pop();
-          if( this.data[i][0].getTime() == newData[0] )
+          if( this.data[i][0].getTime() == newData.tstamp )
           {
-            this.data[i][ index + 1 ] = newData[1];
+            this.data[i][ index + 1 ] = newData.data;
           }
           else
           {
-            this.data.splice( i + 1 , 0 , this.createNewDatapoint( newData[0] , index , newData[1] ) );
+            this.data.splice( i + 1 , 0 , this.createNewDatapoint( newData.tstamp , index , newData.data ) );
           }
         }
 
