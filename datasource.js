@@ -24,47 +24,29 @@ module.exports = function(RED)
 
       var self = this;
 
+      this.tstampField = config.tstampField.trim() || "tstamp";
+      this.dataField = config.dataField.trim() || "data";
+
       this.clients = [];
       this.localHistory = [];
       this.historyMaxLength = config.historyCount;
-      this.historyRequests = [];
+      this.historyRequests = {};
 
       this.on( "input" , function( msg ) {
 
-        if( !util.isArray( msg.payload ) || msg.payload.length < 1 ) return;
+        if( !msg.hasOwnProperty( "payload" ) ) return;
 
-        var i;
-        var newData = {};
-        newData[ self.id ] = msg.payload;
-        newData = JSON.stringify( newData );
-
-        if( util.isArray( msg.payload[0] ) ) // Array of data points ( historical data )
+        // Historic data request
+        if( self.historyRequests.hasOwnProperty( msg._msgid ) )
         {
-          // How much of the data can be cached?
-          var remainingLength = self.historyMaxLength - self.localHistory.length;
-          if( remainingLength > 0 )
-          {
-            if( remainingLength >= msg.payload.length ) self.localHistory = msg.payload.concat( self.localHistory );
-            else self.localHistory = msg.payload.slice( -remainingLength ).concat( self.localHistory );
-          }
-
-          // Send historical data to all clients that requested input
-          var hreq = self.historyRequests;
-          self.historyRequests = [];
-          for( i = 0; i < hreq.length; i++ )
-          {
-            if( hreq[i].ws.readyState == hreq[i].ws.CLOSED ) continue;
-
-            hreq[i].ws.send( newData );
-          }
+          this.historyRequests[ msg._msgid ].end( JSON.stringify( msg.payload ) );
+          delete this.historyRequests[ msg._msgid ];
         }
-        else // Single data point ( live data )
+        else
         {
-          self.localHistory.push( msg.payload );
-          if( self.localHistory.length > self.historyMaxLength )
-          {
-            self.localHistory.shift();
-          }
+          var newData = {};
+          newData[ self.id ] = msg.payload;
+          newData = JSON.stringify( newData );
 
           // Send live data to all connected clients
           for( i = 0; i < self.clients.length; i++ )
@@ -87,6 +69,8 @@ module.exports = function(RED)
         }
       } );
 
+      // Finds the index of a data point inside an array of data points sorted by unique timestamp
+      // If not found, will return the index of the closest data point with timestamp < queried timestamp
       this.findData = function( data , timestamp )
       {
         var min = 0, max = data.length - 1, mid = 0;
@@ -94,40 +78,24 @@ module.exports = function(RED)
         while( max >= min )
         {
           mid = Math.floor( ( min + max ) / 2 );
-          if( data[ mid ][0] == timestamp ) return mid;
-          else if( data[ mid ][0] > timestamp ) max = mid - 1;
+          if( data[ mid ][ this.tstampField ] == timestamp ) return mid;
+          else if( data[ mid ][ this.tstampField ] > timestamp ) max = mid - 1;
           else min = mid + 1;
         }
 
-        return data[ mid ][0] < timestamp ? mid : mid - 1;
+        return data[ mid ][ this.tstampField ] < timestamp ? mid : mid - 1;
       };
 
-      this.handleHistoryRequest = function( client , start , end )
+      this.handleHistoryRequest = function( response , start , end )
       {
-        if( this.localHistory.length > 0 )
-        {
-          if( start >= this.localHistory[0][0] )
-          {
-            var startIndex = this.findData( this.localHistory , start ) + 1;
-            var endIndex = 0;
-            if( end >= this.localHistory[0][0] )
-            {
-              endIndex = this.findData( this.localHistory , end );
-              if( this.localHistory[ endIndex ][0] < end ) endIndex++;
-            }
-            var newData = {};
-            newData[ this.id ] = this.localHistory.slice( endIndex , startIndex );
-            client.ws.send( JSON.stringify( newData ) );
-            start = this.localHistory[0][0];
+        var msg = {
+          payload : {
+            start : start,
+            end : end
           }
-        }
-
-        if( start > end )
-        {
-          this.historyRequests.push( client );
-          // TODO: Flip start and end properly
-          this.send( { payload : { start : end , end : start } } );
-        }
+        };
+        this.send( msg );
+        this.historyRequests[ msg._msgid ] = response;
       };
 
       this.removeClient = function( ws )

@@ -22,13 +22,46 @@ function init( _RED )
       if( nodes[i].type == "iot-datasource" )
       {
         data[ nodes[i].id ] = {
-          name : nodes[i].name
+          name : nodes[i].name,
+          tstampField : nodes[i].tstampField.trim(),
+          dataField : nodes[i].dataField.trim()
         };
       }
     }
 
     response.setHeader( "Content-Type" , "application/json" );
     response.end( JSON.stringify( data ) );
+
+  } );
+
+  app.get( "/history" , function( request , response ) {
+
+    var error = false;
+
+    try
+    {
+      if( !request.query.hasOwnProperty( "start" ) ||
+          !request.query.hasOwnProperty( "end" ) ||
+          !request.query.hasOwnProperty( "id" ) )
+      {
+        throw 1;
+      }
+
+      var start = parseInt( request.query.start );
+      var end = parseInt( request.query.end );
+      if( isNaN( start ) || isNaN( end ) ) throw 1;
+
+      var node = RED.nodes.getNode( request.query.id );
+      if( !node ) throw 1;
+
+      node.handleHistoryRequest( response , start , end );
+    }
+    catch( e )
+    {
+      error = true;
+    }
+
+    if( error ) response.status( 400 ).end();
 
   } );
 
@@ -56,15 +89,7 @@ function handleWSConnection( ws )
     if( !msg.hasOwnProperty( "m" ) ) return;
 
     var node, i;
-    if( msg.m == "history" )
-    {
-      node = RED.nodes.getNode( msg.id );
-      if( node )
-      {
-        node.handleHistoryRequest( { ws : ws } , msg.start , msg.end );
-      }
-    }
-    else if( msg.m == "sub" )
+    if( msg.m == "sub" )
     {
       if( !util.isArray( msg.id ) ) msg.id = [ msg.id ];
       for( i = 0; i < msg.id.length; i++ )
