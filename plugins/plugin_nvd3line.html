@@ -54,38 +54,42 @@
       }
     };
 
+    NVD3Line.prototype._newData = function() {
+      if( this.graph === null )
+      {
+        this.graph = nv.models.lineChart().margin( { left : 100 } )
+                                          .useInteractiveGuideline( true )
+                                          .showXAxis( true )
+                                          .showYAxis( true );
+
+        this.graph.xAxis.axisLabel( "Time" ).tickFormat( function( ts ) {
+          return d3.time.format( "%H:%M:%S" )( new Date( ts ) );
+        } );
+        this.graph.yAxis.tickFormat( d3.format( ".02f" ) );
+
+        d3.select( this.container ).datum( this.data ).transition().duration( 0 ).call( this.graph );
+      }
+      else
+      {
+        this.graph.update();
+      }
+    };
+
     NVD3Line.prototype.pushData = function( index , data ) {
 
       this.data[ index ].values.push( { x : data.tstamp , y : data.data } );
 
-      if( this.data[index].values.length > 1 )
-      {
-        if( this.graph === null )
-        {
-          this.graph = nv.models.lineChart().margin( { left : 100 } )
-                                            .useInteractiveGuideline( true )
-                                            .showXAxis( true )
-                                            .showYAxis( true );
-
-          this.graph.xAxis.axisLabel( "Time" ).tickFormat( function( ts ) {
-            return d3.time.format( "%H:%M:%S" )( new Date( ts ) );
-          } );
-          this.graph.yAxis.tickFormat( d3.format( ".02f" ) );
-
-          d3.select( this.container ).datum( this.data ).transition().duration( 0 ).call( this.graph );
-        }
-        else
-        {
-          this.graph.update();
-        }
-      }
+      this._newData();
     };
 
     NVD3Line.prototype.pushHistoryData = function( index , data ) {
 
+      if( !data.length ) return;
+
       for( var i = data.length - 1; i >= 0; i-- )
         this.data[index].values.unshift( { x : data[i].tstamp , y : data[i].data } );
 
+      this._newData();
     };
 
     App.Plugins.registerChartType( "nvd3line" , NVD3Line , {

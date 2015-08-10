@@ -34,65 +34,77 @@
       }
     };
 
-    MyGraph.prototype.pushData = function( index , data ) {
-      if( index < 0 || index >= this.datasources.length ) return;
-
-      this.data.push( this.createNewDatapoint( data.tstamp , index , data.data ) );
+    MyGraph.prototype._newData = function() {
+      if( !this.data.length ) return;
 
       if( this.limit !== null && this.data.length > this.limit )
       {
         this.data.splice( 0 , this.data.length - this.limit );
       }
 
-      if( this.data.length > 1 )
+      if( this.graph === null )
       {
-        if( this.graph === null )
-        {
-          var graphLabels = [ "Time" ],
-              i;
+        var graphLabels = [ "Time" ],
+            i;
 
-          var options = {
-            connectSeparatedPoints : true,
-            drawPoints : false,
-            showRoller : true,
-            xlabel : this.config.xLabel,
-            ylabel : this.config.yLabel,
-            axisLabelColor : "#8d9194",
-            axisLineColor : "#8d9194",
-            gridLineColor : "#4d4e4f",
-            showRangeSelector : ( this.datasources.length === 1 ),
-            rangeSelectorPlotFillColor : "",
-            rangeSelectorPlotStrokeColor : "#c67a08",
-            labelsDivStyles : {
-              background : "rgba( 0 , 0 , 0 , 0.2 )",
-              color : "#EEE",
-              padding : "5px"
-            },
-            legend : "always",
-            colorValue : 0.7,
-            colorSaturation : 0.6
+        var options = {
+          connectSeparatedPoints : true,
+          drawPoints : false,
+          showRoller : true,
+          xlabel : this.config.xLabel,
+          ylabel : this.config.yLabel,
+          axisLabelColor : "#8d9194",
+          axisLineColor : "#8d9194",
+          gridLineColor : "#4d4e4f",
+          showRangeSelector : ( this.datasources.length === 1 ),
+          rangeSelectorPlotFillColor : "",
+          rangeSelectorPlotStrokeColor : "#c67a08",
+          labelsDivStyles : {
+            background : "rgba( 0 , 0 , 0 , 0.2 )",
+            color : "#EEE",
+            padding : "5px"
+          },
+          legend : "always",
+          colorValue : 0.7,
+          colorSaturation : 0.6
+        };
+
+        options.labels = [ "Time" ];
+        for( i = 0; i < this.datasources.length; i++ )
+        {
+          var label = this.datasources[i].config.label;
+          options.labels.push( label );
+          options[ label ] = {
+            fillGraph : this.datasources[i].config.area
           };
-
-          options.labels = [ "Time" ];
-          for( i = 0; i < this.datasources.length; i++ )
-          {
-            var label = this.datasources[i].config.label;
-            options.labels.push( label );
-            options[ label ] = {
-              fillGraph : this.datasources[i].config.area
-            };
-          }
-
-          $( this.container ).empty();
-          this.graph = new Dygraph( this.container , this.data , options );
-
-          $( this.container ).find( 'input[type="text"]' ).addClass( "form-control" ).css( "width" , "50px" ).css( "height" , "25px" );
         }
-        else
-        {
-          this.graph.updateOptions( { file : this.data } );
-        }
+
+        $( this.container ).empty();
+        this.graph = new Dygraph( this.container , this.data , options );
+
+        $( this.container ).find( 'input[type="text"]' ).addClass( "form-control" ).css( "width" , "50px" ).css( "height" , "25px" );
       }
+      else
+      {
+        this.graph.updateOptions( { file : this.data } );
+      }
+    };
+
+    MyGraph.prototype.pushData = function( index , data ) {
+      if( index < 0 || index >= this.datasources.length ) return;
+
+      var lastElem = this.data.length > 0 ? this.data[ this.data.length - 1 ] : null;
+      if( lastElem === null || lastElem[0].getTime() < data.tstamp )
+      {
+        this.data.push( this.createNewDatapoint( data.tstamp , index , data.data ) );
+      }
+      else
+      {
+        if( lastElem[0].getTime() === data.tstamp ) lastElem[ index + 1 ] = data.data;
+        else return;
+      }
+
+      this._newData();
     };
 
     MyGraph.prototype.addHistoryData = function( index , data ) {
@@ -131,8 +143,11 @@
         if( data.length > 0 )
         {
           this.addHistoryData( index , data );
+          return;
         }
       }
+
+      this._newData();
     };
 
     MyGraph.prototype.findData = function( timestamp )
