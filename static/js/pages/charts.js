@@ -262,9 +262,7 @@ App.Pages.Charts = ( function() {
     chart.name = chartName;
     chart.chartPlugin = selectedPlugin.id;
     chart.datasources = [];
-    chart.config = {
-      history : 1200000
-    };
+    chart.config = {};
 
     for( i = 0; i < $datasources.length; i++ )
     {
