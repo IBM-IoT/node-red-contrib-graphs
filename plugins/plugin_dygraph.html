@@ -8,6 +8,8 @@
       $( container ).append( this.container );
 
       this.config = config;
+      this.config.history = parseInt( this.config.history );
+      if( isNaN( this.config.history ) ) this.config.history = 1200000;
       this.limit = parseInt( this.config.dataLimit );
       if( !isNaN( this.limit ) )
       {
@@ -24,13 +26,10 @@
         this.pushData( data );
       }
 
-      if( this.config.hasOwnProperty( "history" ) )
+      var now = ( new Date() ).getTime();
+      for( var i = 0; i < this.datasources.length; i++ )
       {
-        var now = ( new Date() ).getTime();
-        for( var i = 0; i < this.datasources.length; i++ )
-        {
-          this.datasources[i].datasource.requestHistoryData( i , now - this.config.history , now - 2000 , this.addHistoryData.bind( this ) );
-        }
+        this.datasources[i].datasource.requestHistoryData( i , now - this.config.history , now - 2000 , this.addHistoryData.bind( this ) );
       }
     };
 
