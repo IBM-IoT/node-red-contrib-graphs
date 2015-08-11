@@ -37,13 +37,13 @@ App.Datasource.prototype.isEmpty = function() {
 };
 
 App.Datasource.prototype.convertData = function( data ) {
-  if( this.config.tstampField )
+  if( this.config.tstampField !== "tstamp" )
   {
     data.tstamp = data[ this.config.tstampField ];
     delete data[ this.config.tstampField ];
   }
 
-  if( this.config.dataField )
+  if( this.config.dataField !== "data" )
   {
     data.data = data[ this.config.dataField ];
     delete data[ this.config.dataField ];
