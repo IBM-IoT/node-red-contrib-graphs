@@ -31,6 +31,7 @@ module.exports = function(RED)
       this.clients = [];
       this.localHistory = [];
       this.historyMaxLength = config.historyCount;
+      this.currentHistoryRequest = null;
       this.historyRequests = {};
 
       this.on( "input" , function( msg ) {
@@ -58,10 +59,16 @@ module.exports = function(RED)
         }
 
         // Historic data request
-        if( self.historyRequests.hasOwnProperty( msg._msgid ) )
+        if( !self.currentHistoryRequest && self.historyRequests.hasOwnProperty( msg._msgid ) )
         {
-          self.historyRequests[ msg._msgid ].end( JSON.stringify( msg.payload ) );
+          self.currentHistoryRequest = self.historyRequests[ msg._msgid ];
           delete self.historyRequests[ msg._msgid ];
+        }
+
+        if( self.currentHistoryRequest )
+        {
+          self.currentHistoryRequest.end( JSON.stringify( msg.payload ) );
+          self.currentHistoryRequest = null;
         }
         else
         {
@@ -115,7 +122,10 @@ module.exports = function(RED)
             end : end
           }
         };
+
+        self.currentHistoryRequest = response;
         this.send( msg );
+        self.currentHistoryRequest = null;
         this.historyRequests[ msg._msgid ] = response;
       };
 
