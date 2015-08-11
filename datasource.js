@@ -26,6 +26,7 @@ module.exports = function(RED)
 
       this.tstampField = config.tstampField.trim() || "tstamp";
       this.dataField = config.dataField.trim() || "data";
+      this.dataComponents = undefined;
 
       this.clients = [];
       this.localHistory = [];
@@ -36,11 +37,31 @@ module.exports = function(RED)
 
         if( !msg.hasOwnProperty( "payload" ) ) return;
 
+        // Deduce(?) data components
+        if( self.dataComponents === undefined )
+        {
+          var dataPoint = util.isArray( msg.payload ) ? msg.payload[0] : msg.payload;
+          if( dataPoint.hasOwnProperty( self.dataField ) )
+          {
+            if( typeof dataPoint[ self.dataField ] === "object" )
+            {
+              self.dataComponents = [];
+              var dataObj = dataPoint[ self.dataField ];
+              for( var key in dataObj )
+              {
+                if( !dataObj.hasOwnProperty( key ) ) continue;
+                self.dataComponents.push( key );
+              }
+            }
+            else self.dataComponents = null;
+          }
+        }
+
         // Historic data request
         if( self.historyRequests.hasOwnProperty( msg._msgid ) )
         {
-          this.historyRequests[ msg._msgid ].end( JSON.stringify( msg.payload ) );
-          delete this.historyRequests[ msg._msgid ];
+          self.historyRequests[ msg._msgid ].end( JSON.stringify( msg.payload ) );
+          delete self.historyRequests[ msg._msgid ];
         }
         else
         {

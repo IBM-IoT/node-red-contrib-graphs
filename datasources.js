@@ -21,10 +21,14 @@ function init( _RED )
     {
       if( nodes[i].type == "iot-datasource" )
       {
-        data[ nodes[i].id ] = {
-          name : nodes[i].name,
-          tstampField : nodes[i].tstampField.trim(),
-          dataField : nodes[i].dataField.trim()
+        var node = RED.nodes.getNode( nodes[i].id );
+        if( !node ) continue;
+
+        data[ node.id ] = {
+          name : node.name,
+          tstampField : node.tstampField,
+          dataField : node.dataField,
+          dataComponents : node.dataComponents
         };
       }
     }
