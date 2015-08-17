@@ -22,8 +22,8 @@ App.Main = ( function() {
 
 } )();
 
-$( window ).on( "resize" , function() {
-  $( "#gridList" ).gridList( "resize" );
+$( window ).on( "resize" , function( event ) {
+  if( event.target === window ) $( "#gridList" ).gridList( "resize" );
 } );
 
 $( document ).on( "ready" , function() {
