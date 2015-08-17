@@ -11,6 +11,8 @@ App.Pages.Charts = ( function() {
   var selectedPlugin = null;
   var datasourceNextID = 0;
 
+  var forceSave = false;
+
   var $datasourceConfigTemplate = null;
 
   function openChartModal( chartid )
@@ -322,7 +324,14 @@ App.Pages.Charts = ( function() {
         name : chart.name
       } ) );
 
-      $( "#gridList" ).gridList( "add" , $listItem , DEFAULT_CHART_WIDTH , DEFAULT_CHART_HEIGHT );
+      var newPos = $( "#gridList" ).gridList( "add" , $listItem , DEFAULT_CHART_WIDTH , DEFAULT_CHART_HEIGHT );
+      chart.pos = {
+        x : newPos.x,
+        y : newPos.y,
+        w : DEFAULT_CHART_WIDTH,
+        h : DEFAULT_CHART_HEIGHT
+      };
+
       loadChart( chart.id , chart , $listItem.find( ".gridItemContent" ) );
     }
     else
@@ -378,9 +387,9 @@ App.Pages.Charts = ( function() {
         {
           $parent = $( this ).parents( "li" );
           var id = $parent.attr( "data-id" );
-          $( "#gridList" ).gridList( "remove" , $parent );
           App.Dashboard.currentDashboard.removeChart( id );
-          App.Settings.saveSettings();
+
+          $( "#gridList" ).gridList( "remove" , $parent );
         }
       } );
 
@@ -391,6 +400,26 @@ App.Pages.Charts = ( function() {
     {
       var chartid = $parent.attr( "data-id" );
       openChartModal( chartid );
+    }
+  }
+
+  function gridListOnChange( items )
+  {
+    if( items.length > 0 || forceSave )
+    {
+      $( "#gridList" ).gridList( "_updateElementData" );
+      $( "#gridList > li[data-id]" ).each( function() {
+        var chart = App.Dashboard.currentDashboard.chartSettings[ $( this ).attr( "data-id" ) ];
+        chart.pos = {
+          x : Number( $( this ).attr( "data-x" ) ),
+          y : Number( $( this ).attr( "data-y" ) ),
+          w : Number( $( this ).attr( "data-w" ) ),
+          h : Number( $( this ).attr( "data-h" ) )
+        };
+      } );
+
+      App.Settings.saveSettings();
+      forceSave = false;
     }
   }
 
@@ -414,10 +443,10 @@ App.Pages.Charts = ( function() {
       } ) );
 
       $listItem.attr( {
-        'data-w' : DEFAULT_CHART_WIDTH,
-        'data-h' : DEFAULT_CHART_HEIGHT,
-        'data-x' : ( count % 2 ) * DEFAULT_CHART_WIDTH,
-        'data-y' : Math.floor( count / 2 )
+        'data-x' : chart.pos.x,
+        'data-y' : chart.pos.y,
+        'data-w' : chart.pos.w,
+        'data-h' : chart.pos.h
       } );
 
       $container.append( $listItem );
@@ -429,7 +458,8 @@ App.Pages.Charts = ( function() {
     $container.gridList( {
       rows : 4,
       vertical : true,
-      widthHeightRatio : 0.65
+      widthHeightRatio : 0.65,
+      onChange : gridListOnChange
     } , {
       handle : ".gridItemHeader",
       zIndex : 1000
