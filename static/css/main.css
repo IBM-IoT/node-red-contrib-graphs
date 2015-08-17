@@ -36,6 +36,8 @@ body {
 }
 
 #gridList li {
+  display: flex;
+  flex-direction: column;
   padding: 0;
   position: absolute;
   -moz-transition: top 0.2s,
@@ -44,15 +46,17 @@ body {
                       left 0.2s;
 }
 
-#gridList li.ui-draggable-dragging {
+#gridList li.ui-draggable-dragging, #gridList li.ui-resizable-resizing {
   -moz-transition: none;
   -webkit-transition: none;
 }
 
 .gridItemHeader {
   -webkit-user-select: none;
-  height: 10%;
-  padding: .25%;
+  -moz-user-select: none;
+  user-select: none;
+  height: 30px;
+  padding: 2px;
   display: block;
   background-color: #353A40;
   text-align: center;
@@ -60,9 +64,12 @@ body {
 }
 
 .gridItemContent {
-  height: 88.5%;
-  padding: .5%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
   background-color: #292C2F;
+  overflow: hidden;
 }
 
 .position-highlight {
