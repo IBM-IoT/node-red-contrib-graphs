@@ -115,6 +115,11 @@
       this._unbindEvents();
       this._init();
       this._bindEvents();
+
+      return {
+        x : nextPos[0],
+        y : nextPos[1]
+      };
     },
 
     remove: function( element ) {
@@ -562,6 +567,8 @@
       method = options;
       args =  Array.prototype.slice.call(arguments, 1);
     }
+
+    var returnValue = this;
     this.each(function() {
       instance = $(this).data('_gridList');
       // The plugin call be called with no method on an existing GridList
@@ -575,11 +582,12 @@
         $(this).data('_gridList', instance);
       }
       if (method) {
-        instance[method].apply(instance, args);
+        var r = instance[method].apply(instance, args);
+        if( r !== undefined ) returnValue = r;
       }
     });
-    // Maintain jQuery chain
-    return this;
+
+    return returnValue;
   };
 
 }));
