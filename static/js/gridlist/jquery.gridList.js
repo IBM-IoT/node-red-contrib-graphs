@@ -9,10 +9,10 @@
   }
 }(function($, GridList) {
 
-  var DraggableGridList = function(element, options, draggableOptions) {
+  var DraggableGridList = function(element, options, draggableOptions, resizableOptions) {
     this.options = $.extend({}, this.defaults, options);
-    this.draggableOptions = $.extend(
-      {}, this.draggableDefaults, draggableOptions);
+    this.draggableOptions = $.extend( {}, this.draggableDefaults, draggableOptions);
+    this.resizableOptions = $.extend( {}, this.resizableDefauls, resizableOptions );
 
     this.$element = $(element);
     this._init();
@@ -33,6 +33,11 @@
     draggableDefaults: {
       zIndex: 2,
       scroll: false,
+      containment: "parent"
+    },
+
+    resizableDefauls: {
+      handles: "se",
       containment: "parent"
     },
 
@@ -166,6 +171,8 @@
       // Read items and their meta data. Ignore other list elements (like the
       // position highlight)
       this.$items = this.$element.children(this.options.itemSelector);
+      this.$items.resizable(this.resizableOptions);
+
       this.items = this._generateItemsFromDOM();
       this._widestItem = Math.max.apply(
         null, this.items.map(function(item) { return item.w; }));
@@ -196,15 +203,23 @@
       this._onStart = this._bindMethod(this._onStart);
       this._onDrag = this._bindMethod(this._onDrag);
       this._onStop = this._bindMethod(this._onStop);
+      this._onResize = this._bindMethod(this._onResize);
+      this._onResizeStop = this._bindMethod(this._onResizeStop);
       this.$items.on('dragstart', this._onStart);
       this.$items.on('drag', this._onDrag);
       this.$items.on('dragstop', this._onStop);
+      this.$items.on('resizestart', this._onStart);
+      this.$items.on('resize', this._onResize);
+      this.$items.on('resizestop', this._onResizeStop);
     },
 
     _unbindEvents: function() {
       this.$items.off('dragstart', this._onStart);
       this.$items.off('drag', this._onDrag);
       this.$items.off('dragstop', this._onStop);
+      this.$items.off('resizestart', this._onStart);
+      this.$items.off('resize', this._onResize);
+      this.$items.off('resizestop', this._onResizeStop);
     },
 
     _onStart: function(event, ui) {
@@ -249,6 +264,42 @@
       $(ui.helper).removeClass('ui-draggable-dragging');
 
       this._applyPositionToItems();
+      this._removePositionHighlight();
+    },
+
+    _onResize: function( event, ui ) {
+      if( !ui ) return;
+
+      var item = this._getItemByElement( ui.helper ),
+          newSize = this._snapItemSizeToGrid( item );
+
+      if( !this.previousSize ||
+          this.previousSize.w !== newSize.w || this.previousSize.h !== newSize.h )
+      {
+        this.previousSize = newSize;
+
+        // Regenerate the grid with the positions from when the drag started
+        GridList.cloneItems(this._items, this.items);
+        this.gridList.generateGrid();
+
+        // Since the items list is a deep copy, we need to fetch the item
+        // corresponding to this drag action again
+        item = this._getItemByElement(ui.helper);
+        this.gridList.resizeItem( item , newSize );
+
+        // Visually update item positions and highlight shape
+        this._applyPositionToItems();
+        this._highlightPositionForItem(item);
+      }
+    },
+
+    _onResizeStop: function( event, ui ) {
+      this._updateGridSnapshot();
+      this.previousSize = null;
+
+      $(ui.helper).removeClass('ui-resizable-resizing');
+
+      this._applySizeToItems();
       this._removePositionHighlight();
     },
 
@@ -314,6 +365,12 @@
       if (this.options.heightToFontSizeRatio) {
         this._fontSize = this._cellHeight * this.options.heightToFontSizeRatio;
       }
+
+      // Set resize limits based on new cell size
+      this.$items.resizable( "option" , {
+        minWidth: this._cellWidth * 0.8,
+        minHeight: this._cellHeight * 0.8
+      } );
     },
 
     _getItemWidth: function(item) {
@@ -344,6 +401,8 @@
           width: this._getItemWidth(this.items[i]),
           height: this._getItemHeight(this.items[i])
         });
+
+        this.items[i].$element.trigger( "resize" );
       }
       if (this.options.heightToFontSizeRatio) {
         this.$items.css('font-size', this._fontSize);
@@ -417,6 +476,28 @@
       col = Math.min(col, this._maxGridCols);
       row = Math.min(row, this.options.rows - item.h);
       return [col, row];
+    },
+
+    _snapItemSizeToGrid: function( item ) {
+      var width = item.$element.width();
+      var height = item.$element.height();
+
+      var newWidth = Math.ceil( width / this._cellWidth );
+      var newHeight = Math.ceil( height / this._cellHeight );
+
+      if( this.options.vertical )
+      {
+        var temp = newHeight;
+        newHeight = newWidth;
+        newWidth = temp;
+      }
+
+      newHeight = Math.min( newHeight , this.options.rows - item.y );
+
+      return {
+        w: newWidth,
+        h: newHeight
+      };
     },
 
     _highlightPositionForItem: function(item) {
