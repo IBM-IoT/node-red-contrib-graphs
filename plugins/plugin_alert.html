@@ -1,0 +1,62 @@
+<style>
+@keyframes alertPluginGlowAnimation {
+  from {
+    opacity : 0.5
+  }
+  to {
+    opacity : 1.0
+  }
+}
+
+.alertPluginBackground {
+  background-image: url( 'plugins/alert/alert_bg.png' );
+  background-repeat: no-repeat;
+  width: 256px;
+  height: 256px;
+  margin: auto;
+}
+
+.alertPluginGlow {
+  opacity: 0.2;
+  background-image: url( 'plugins/alert/alert_glow.png' );
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+}
+
+.alertPluginGlow.animate {
+  animation: alertPluginGlowAnimation 0.25s infinite alternate ease-in-out;
+}
+</style>
+
+<script type="text/javascript">
+  ( function() {
+
+    var AlertPlugin = function( container , datasources , config , data ) {
+      this.datasources = datasources;
+
+      this.container = $( container );
+
+      this.container.append( '<div class="alertPluginBackground"><div class="alertPluginGlow"></div></div>' );
+      this.$alertGlow = this.container.find( ".alertPluginGlow" );
+    };
+
+    AlertPlugin.prototype.pushData = function( index , data ) {
+
+      if( data.data.type === "ok" )
+      {
+        this.$alertGlow.removeClass( "animate" );
+      }
+      else
+      {
+        this.$alertGlow.addClass( "animate" );
+      }
+
+    };
+
+    App.Plugins.registerChartType( "alert-plugin" , AlertPlugin , {
+      display_name : "Alert"
+    } );
+
+  } )();
+</script>
