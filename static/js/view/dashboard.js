@@ -15,9 +15,6 @@ App.View.Dashboard = ( function() {
 
     function open( chart )
     {
-      // selectedPlugin = null;
-      // $datasourceConfigTemplate = null;
-
       datasourceNextID = 0;
 
       var key, i;
