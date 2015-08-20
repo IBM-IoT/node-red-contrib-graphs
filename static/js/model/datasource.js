@@ -8,10 +8,26 @@ App.Model.Datasource = ( function() {
     for( var i in config )
       this[i] = config[i];
 
+    if( this.tstampField !== "tstamp" ) this.tstampField = this.tstampField.split(".");
+    if( this.dataField !== "data" ) this.dataField = this.dataField.split(".");
+
     this.id = id;
     this.chartCount = 0;
     this.charts = {};
     this.end = null;
+  };
+
+  Datasource.prototype.getNestedValue = function( obj , keyArr ) {
+    try
+    {
+      return keyArr.reduce( function( reduceObj , i ) {
+        return reduceObj[i];
+      } , obj );
+    }
+    catch( e )
+    {
+      return undefined;
+    }
   };
 
   Datasource.prototype.addChart = function( chart , index ) {
@@ -42,19 +58,12 @@ App.Model.Datasource = ( function() {
   };
 
   Datasource.prototype.convertData = function( data ) {
-    if( this.tstampField !== "tstamp" )
-    {
-      data.tstamp = data[ this.tstampField ];
-      delete data[ this.tstampField ];
-    }
+    var converted = {
+      tstamp : this.tstampField == "tstamp" ? data.tstamp : this.getNestedValue( data , this.tstampField ),
+      data : this.dataField == "data" ? data.data : this.getNestedValue( data , this.dataField )
+    };
 
-    if( this.dataField !== "data" )
-    {
-      data.data = data[ this.dataField ];
-      delete data[ this.dataField ];
-    }
-
-    return data;
+    return converted;
   };
 
   Datasource.prototype.pushData = function( data ) {
@@ -70,7 +79,7 @@ App.Model.Datasource = ( function() {
     var self = this;
 
     $.getJSON( "api/datasources/history?id=" + this.id + "&start=" + start + "&end=" + end ).done( function( data ) {
-      if( self.config.tstampField || self.config.dataField )
+      if( self.tstampField !== "tstamp" || self.dataField !== "data" )
       {
         for( var i = 0; i < data.length; i++ )
           data[i] = self.convertData( data[i] );
