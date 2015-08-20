@@ -3,22 +3,25 @@
   <head>
     <meta charset="utf-8">
     <link rel="shortcut icon" href="favicon.ico">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script>
-    <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
-    <script src="js/jquery/jquery-ui.min.js"></script>
+    <script src="js/lib/d3.min.js" charset="utf-8"></script>
+    <script src="js/lib/jquery/jquery-2.1.4.min.js"></script>
+    <script src="js/lib/jquery/jquery-ui.min.js"></script>
     <script src="js/gridlist/gridList.js"></script>
     <script src="js/gridlist/jquery.gridList.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/jsrender.min.js"></script>
+    <script src="js/lib/bootstrap.min.js"></script>
+    <script src="js/lib/jsrender.min.js"></script>
     <script src="js/plugins.js"></script>
     <script src="js/page.js"></script>
     <script src="js/modal.js"></script>
     <script src="js/settings.js"></script>
-    <script src="js/dashboard.js"></script>
-    <script src="js/datasource.js"></script>
     <script src="js/net.js"></script>
-    <script src="js/pages/dashboards.js"></script>
-    <script src="js/pages/charts.js"></script>
+    <script src="js/model/dashboard.js"></script>
+    <script src="js/model/datasource.js"></script>
+    <script src="js/model/chart.js"></script>
+    <script src="js/view/dashboardlist.js"></script>
+    <script src="js/view/dashboard.js"></script>
+    <script src="js/controller/dashboardlist.js"></script>
+    <script src="js/controller/dashboard.js"></script>
     <script src="js/main.js"></script>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/bootstrap-theme.min.css">
@@ -38,21 +41,21 @@
           <span class="navbar-brand">node-red-contrib-graphs<span id="titleDashboard"></span></span>
         </div>
         <div class="collapse navbar-collapse" id="navbar-collapsed">
-          <ul class="nav navbar-nav navbar-right" id="dashboardPageNav">
+          <ul class="nav navbar-nav navbar-right" id="dashboardListPageNav">
             <li><a href="#" id="createNewDashboard"><span class="glyphicon glyphicon-plus"></span> Create New Dashboard</a></li>
           </ul>
-          <ul class="nav navbar-nav navbar-right" id="chartsPageNav">
+          <ul class="nav navbar-nav navbar-right" id="dashboardPageNav">
             <li><a href="#" id="createNewChart"><span class="glyphicon glyphicon-plus"></span> Create New Chart</a></li>
           </ul>
         </div>
       </div>
     </nav>
 
-    <div id="dashboardPage" class="container">
+    <div id="dashboardListPage" class="container">
 
     </div>
 
-    <div id="chartsPage" class="container">
+    <div id="dashboardPage" class="container">
       <ul id="gridList">
         <li class="position-highlight"></li>
       </ul>
@@ -157,7 +160,7 @@
           <div class="form-group">
             <input id="nds{{:uid}}-label" class="form-control" type="text" placeholder="Label">
           </div>
-          <div id="ds{{:uid}}-config">
+          <div class="datasourcePluginConfig">
           </div>
         </div>
       </div>

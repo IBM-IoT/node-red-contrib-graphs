@@ -6,13 +6,15 @@ App.Main = ( function() {
   function init()
   {
     App.Plugins.loadPlugins().done( function() {
-      $.when( App.Datasource.getDatasources() , App.Settings.loadSettings() ).done( function() {
-        App.Pages.Dashboards.populateDashboardList( App.Dashboard.dashboards );
+      App.Model.Datasource.getDatasources().done( function() {
+        App.Settings.loadSettings().done( function() {
+          App.View.DashboardList.render( App.Model.Dashboard.dashboards );
+        } );
       } );
     } ).fail( function() {
-      $( "#dashboardPage" ).append( '<div class="alert alert-danger">Error loading plugins.</div>' );
+      $( "#dashboardListPage" ).append( '<div class="alert alert-danger">Error loading plugins.</div>' );
     } ).always( function() {
-      App.Page.navigateTo( "#dashboardPage" );
+      App.Page.navigateTo( "#dashboardListPage" );
     } );
   }
 
@@ -30,7 +32,7 @@ $( document ).on( "ready" , function() {
 
   App.Main.init();
 
-  App.Pages.Dashboards.init();
-  App.Pages.Charts.init();
+  for( var i in App.Controller )
+    App.Controller[i].init();
 
 } );
