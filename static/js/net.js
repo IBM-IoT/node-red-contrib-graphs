@@ -29,13 +29,7 @@ App.Net = ( function() {
       }
       else
       {
-        if( App.Dashboard.currentDashboard !== null )
-        {
-          for( var dsid in data )
-          {
-            App.Dashboard.currentDashboard.pushData( dsid , data[ dsid ] );
-          }
-        }
+        App.Controller.Dashboard.onNetworkMessage( data );
       }
     };
 

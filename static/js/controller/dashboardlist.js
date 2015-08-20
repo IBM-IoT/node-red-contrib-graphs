@@ -29,12 +29,12 @@ App.Controller.DashboardList = ( function() {
       return;
     }
 
-    var dashboard = new App.Dashboard( dashboardName );
+    var dashboard = new App.Model.Dashboard( dashboardName );
+    App.Model.Dashboard.addDashboard( dashboard );
 
-    var dashid = App.Dashboard.addDashboard( dashboard );
     App.Settings.saveSettings();
     App.View.DashboardList.Modal.close();
-    openDashboard( dashid );
+    openDashboard( dashboard );
   }
 
   function dashboardButtonClick()
@@ -42,28 +42,27 @@ App.Controller.DashboardList = ( function() {
     var id = $( this ).attr( "data-open" );
     if( id !== undefined )
     {
-      openDashboard( id );
+      var dashboard = App.Model.Dashboard.getDashboard( id );
+      openDashboard( dashboard );
     }
     else
     {
       id = $( this ).attr( "data-remove" );
       var name = $( this ).siblings( "button" ).text();
       App.Modal.show( "Remove " + name + "?" , "" , function() {
-        App.Dashboard.removeDashboard( id );
+        App.Model.Dashboard.removeDashboard( id );
         App.Settings.saveSettings();
-        App.View.DashboardList.render( App.Dashboard.dashboards );
+        App.View.DashboardList.render( App.Model.Dashboard.dashboards );
       } );
     }
   }
 
-  function openDashboard( id )
+  function openDashboard( dashboard )
   {
-    var dashboard = App.Dashboard.getDashboard( id );
-    if( dashboard === null ) return;
-
+    if( !dashboard ) return;
     App.Net.createConnection().done( function() {
-      App.Page.navigateTo( "#chartsPage" , function() {
-        App.Pages.Charts.loadDashboard( dashboard );
+      App.Page.navigateTo( "#dashboardPage" , function() {
+        App.Controller.Dashboard.loadDashboard( dashboard );
       } );
     } );
   }

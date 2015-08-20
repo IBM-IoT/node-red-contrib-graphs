@@ -6,8 +6,10 @@ App.Main = ( function() {
   function init()
   {
     App.Plugins.loadPlugins().done( function() {
-      $.when( App.Datasource.getDatasources() , App.Settings.loadSettings() ).done( function() {
-        App.View.DashboardList.render( App.Dashboard.dashboards );
+      App.Model.Datasource.getDatasources().done( function() {
+        App.Settings.loadSettings().done( function() {
+          App.View.DashboardList.render( App.Model.Dashboard.dashboards );
+        } );
       } );
     } ).fail( function() {
       $( "#dashboardListPage" ).append( '<div class="alert alert-danger">Error loading plugins.</div>' );
