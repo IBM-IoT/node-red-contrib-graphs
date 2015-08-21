@@ -30,18 +30,14 @@ App.Model.Datasource = ( function() {
     }
   };
 
-  Datasource.prototype.addChart = function( chart , index ) {
+  Datasource.prototype.addChart = function( chart ) {
     if( this.charts.hasOwnProperty( chart.id ) )
     {
       console.error( "Datasource already has chart: " + chart.id );
       return;
     }
 
-    this.charts[ chart.id ] = {
-      index : index,
-      chart : chart
-    };
-
+    this.charts[ chart.id ] = chart;
     this.chartCount++;
   };
 
@@ -71,7 +67,7 @@ App.Model.Datasource = ( function() {
 
     for( var id in this.charts )
     {
-      this.charts[id].chart.pushData( this.charts[id].index , data );
+      this.charts[id].pushData( this , data );
     }
   };
 

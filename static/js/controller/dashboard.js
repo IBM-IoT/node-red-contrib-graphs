@@ -96,6 +96,7 @@ App.Controller.Dashboard = ( function() {
     chart.name = chartName;
     chart.plugin = selectedPlugin;
     chart.datasources = [];
+    chart.datasourceMap = {};
     chart.config = {};
 
     for( i = 0; i < $datasources.length; i++ )
@@ -129,7 +130,7 @@ App.Controller.Dashboard = ( function() {
         }
       }
 
-      chart.datasources.push( datasource );
+      chart.addDatasource( datasource.datasource , datasource.config );
     }
 
     var $chartConfig = $( "#chartPluginConfig" );

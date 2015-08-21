@@ -6,8 +6,10 @@ App.Model.Chart = ( function() {
 
   var Chart = function( data )
   {
-    if( data ) this.unserialize( data );
     this.pluginInstance = null;
+    this.datasourceMap = {};
+
+    if( data ) this.unserialize( data );
   };
 
   Chart.prototype.serialize = function()
@@ -51,11 +53,21 @@ App.Model.Chart = ( function() {
       var datasource = App.Model.Datasource.getDatasource( data.datasources[i].id );
       if( !datasource ) continue;
 
-      this.datasources.push( {
-        datasource : datasource,
-        config : data.datasources[i].config
-      } );
+      this.addDatasource( datasource , data.datasources[i].config );
     }
+  };
+
+  Chart.prototype.addDatasource = function( datasource , config )
+  {
+    var index = this.datasources.length;
+
+    this.datasources.push( {
+      datasource : datasource,
+      config : config,
+      index : index
+    } );
+
+    this.datasourceMap[ datasource.id ] = this.datasources[ index ];
   };
 
   Chart.prototype.load = function( $container )
@@ -65,9 +77,13 @@ App.Model.Chart = ( function() {
     this.pluginInstance = new this.plugin.plugin( $container[0] , this.datasources , this.config );
   };
 
-  Chart.prototype.pushData = function( index , data )
+  Chart.prototype.pushData = function( datasource , data )
   {
-    if( this.pluginInstance ) this.pluginInstance.pushData( index , data );
+    if( this.pluginInstance )
+    {
+      datasource = this.datasourceMap[ datasource.id ];
+      this.pluginInstance.pushData( datasource.index , data );
+    }
   };
 
   return Chart;
