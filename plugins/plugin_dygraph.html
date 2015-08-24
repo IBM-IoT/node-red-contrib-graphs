@@ -1,8 +1,9 @@
 <script type="text/javascript">
   ( function() {
 
-    var MyGraph = function( container , datasources , config , data ) {
+    var MyGraph = function( container , datasources , components , config ) {
       this.datasources = datasources;
+      this.components = components;
 
       this.container = $( '<div style="flex:1"></div>' )[0];
       $( container ).append( this.container );
@@ -14,22 +15,17 @@
       if( !isNaN( this.limit ) )
       {
         if( this.limit < 10 ) this.limit = 10;
-        this.limit *= datasources.length;
+        this.limit *= components.length;
       }
       else this.limit = null;
 
       this.data = [];
       this.graph = null;
 
-      if( data && data.length > 0 )
-      {
-        this.pushData( data );
-      }
-
       var now = ( new Date() ).getTime();
       for( var i = 0; i < this.datasources.length; i++ )
       {
-        this.datasources[i].datasource.requestHistoryData( i , now - this.config.history , now - 2000 , this.addHistoryData.bind( this ) );
+        this.datasources[i].requestHistoryData( now - this.config.history , now - 2000 , this.addHistoryData.bind( this ) );
       }
 
       $( container ).parents( "li" ).on( "resize" , this._resize.bind( this ) );
@@ -66,7 +62,7 @@
           axisLabelColor : "#8d9194",
           axisLineColor : "#8d9194",
           gridLineColor : "#4d4e4f",
-          showRangeSelector : ( this.datasources.length === 1 ),
+          showRangeSelector : ( this.components.length === 1 ),
           rangeSelectorPlotFillColor : "",
           rangeSelectorPlotStrokeColor : "#c67a08",
           labelsDivStyles : {
@@ -80,12 +76,12 @@
         };
 
         options.labels = [ "Time" ];
-        for( i = 0; i < this.datasources.length; i++ )
+        for( i = 0; i < this.components.length; i++ )
         {
-          var label = this.datasources[i].config.label;
+          var label = this.components[i].config.label;
           options.labels.push( label );
           options[ label ] = {
-            fillGraph : this.datasources[i].config.area
+            fillGraph : this.components[i].datasource.config.area
           };
         }
 
@@ -101,16 +97,16 @@
     };
 
     MyGraph.prototype.pushData = function( index , data ) {
-      if( index < 0 || index >= this.datasources.length ) return;
+      if( index < 0 || index >= this.components.length ) return;
 
       var lastElem = this.data.length > 0 ? this.data[ this.data.length - 1 ] : null;
       if( lastElem === null || lastElem[0].getTime() < data.tstamp )
       {
-        this.data.push( this.createNewDatapoint( data.tstamp , index , data.data ) );
+        this.data.push( this.createNewDatapoint( data.tstamp , index , this.components[index].getData( data.data ) ) );
       }
       else
       {
-        if( lastElem[0].getTime() === data.tstamp ) lastElem[ index + 1 ] = data.data;
+        if( lastElem[0].getTime() === data.tstamp ) lastElem[ index + 1 ] = this.components[index].getData( data.data );
         else return;
       }
 
@@ -124,7 +120,7 @@
       {
         for( i = data.length - 1; i >= 0; i-- )
         {
-          this.data.unshift( this.createNewDatapoint( data[i].tstamp , index , data[i].data ) );
+          this.data.unshift( this.createNewDatapoint( data[i].tstamp , index , this.components[index].getData( data[i].data ) ) );
         }
       }
       else
@@ -142,11 +138,11 @@
           var newData = data.pop();
           if( this.data[i][0].getTime() == newData.tstamp )
           {
-            this.data[i][ index + 1 ] = newData.data;
+            this.data[i][ index + 1 ] = this.components[index].getData( newData.data );
           }
           else
           {
-            this.data.splice( i + 1 , 0 , this.createNewDatapoint( newData.tstamp , index , newData.data ) );
+            this.data.splice( i + 1 , 0 , this.createNewDatapoint( newData.tstamp , index , this.components[index].getData( newData.data ) ) );
           }
         }
 
@@ -178,7 +174,7 @@
     MyGraph.prototype.createNewDatapoint = function( timestamp , index , data )
     {
       var newData = [ new Date( timestamp ) ];
-      for( var i = 0; i < this.datasources.length; i++ )
+      for( var i = 0; i < this.components.length; i++ )
       {
         newData.push( i === index ? data : null );
       }
