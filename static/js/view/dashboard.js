@@ -114,6 +114,8 @@ App.View.Dashboard = ( function() {
 
       if( datasource.dataComponents )
       {
+        $datasource.find( "#nds" + dsData.uid + "-label" ).hide();
+
         var dcTemplate = $.templates( "#tmpl_ChartDatasourceComponent" );
         var $componentContainer = $( '<div class="datasourceDataComponents"></div>' );
         $datasource.find( ".panel-body" ).prepend( $componentContainer );
