@@ -58,6 +58,8 @@ module.exports = function(RED)
           }
         }
 
+        var newData;
+
         // Historic data request
         if( !self.currentHistoryRequest && self.historyRequests.hasOwnProperty( msg._msgid ) )
         {
@@ -67,13 +69,22 @@ module.exports = function(RED)
 
         if( self.currentHistoryRequest )
         {
-          self.currentHistoryRequest.end( JSON.stringify( msg.payload ) );
+          newData = {
+            type : "history",
+            id : self.id,
+            cid : self.currentHistoryRequest.cid,
+            data : msg.payload
+          };
+          self.currentHistoryRequest.ws.send( JSON.stringify( newData ) );
           self.currentHistoryRequest = null;
         }
         else
         {
-          var newData = {};
-          newData[ self.id ] = msg.payload;
+          newData = {
+            type : "live",
+            id : self.id,
+            data : msg.payload
+          };
           newData = JSON.stringify( newData );
 
           // Send live data to all connected clients
@@ -114,7 +125,7 @@ module.exports = function(RED)
         return data[ mid ][ this.tstampField ] < timestamp ? mid : mid - 1;
       };
 
-      this.handleHistoryRequest = function( response , start , end )
+      this.handleHistoryRequest = function( ws , cid , start , end )
       {
         var msg = {
           payload : {
@@ -123,10 +134,15 @@ module.exports = function(RED)
           }
         };
 
-        self.currentHistoryRequest = response;
+        var request = {
+          ws : ws,
+          cid : cid
+        };
+
+        self.currentHistoryRequest = request;
         this.send( msg );
         self.currentHistoryRequest = null;
-        this.historyRequests[ msg._msgid ] = response;
+        this.historyRequests[ msg._msgid ] = request;
       };
 
       this.removeClient = function( ws )

@@ -68,10 +68,17 @@ App.Net = ( function() {
     ws.send( JSON.stringify( { m : "unsub" , id : datasources } ) );
   }
 
+  function requestHistoryData( dsid , cid , start , end )
+  {
+    if( ws === null ) return;
+    ws.send( JSON.stringify( { m : "hist" , dsid : dsid , cid : cid , start : start , end : end } ) );
+  }
+
   return {
     createConnection : createConnection,
     subscribeToDatasources : subscribeToDatasources,
-    unsubscribeFromDatasources : unsubscribeFromDatasources
+    unsubscribeFromDatasources : unsubscribeFromDatasources,
+    requestHistoryData : requestHistoryData
   };
 
 } )();

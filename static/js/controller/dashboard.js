@@ -162,7 +162,6 @@ App.Controller.Dashboard = ( function() {
     if( !editingChart )
     {
       $container = App.View.Dashboard.createChartContainer( chart );
-      chart.load( $container );
     }
     else
     {
@@ -171,11 +170,11 @@ App.Controller.Dashboard = ( function() {
 
       currentDashboard.removeChart( chart.id );
       $container = App.View.Dashboard.updateChartContainer( chart );
-      chart.load( $container );
     }
 
     editingChart = null;
     currentDashboard.addChart( chart );
+    chart.load( $container );
     App.Settings.saveSettings();
 
     App.View.Dashboard.Modal.close();
@@ -252,8 +251,7 @@ App.Controller.Dashboard = ( function() {
   {
     if( !currentDashboard ) return;
 
-    for( var id in data )
-      currentDashboard.pushData( id , data[id] );
+    currentDashboard.pushData( data );
   }
 
   function loadDashboard( dashboard )

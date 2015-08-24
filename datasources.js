@@ -117,6 +117,14 @@ function handleWSConnection( ws )
         }
       }
     }
+    else if( msg.m == "hist" )
+    {
+      node = RED.nodes.getNode( msg.dsid );
+      if( node )
+      {
+        node.handleHistoryRequest( ws , msg.cid , msg.start , msg.end );
+      }
+    }
 
   } );
 

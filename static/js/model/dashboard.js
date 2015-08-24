@@ -95,11 +95,12 @@ App.Model.Dashboard = ( function() {
     App.Net.subscribeToDatasources( sub );
   };
 
-  Dashboard.prototype.pushData = function( dsid , data ) {
-    if( this.datasources.hasOwnProperty( dsid ) )
-    {
-      this.datasources[ dsid ].pushData( data );
-    }
+  Dashboard.prototype.pushData = function( data ) {
+    if( !this.datasources.hasOwnProperty( data.id ) ) return;
+
+    var datasource = this.datasources[ data.id ];
+    if( data.type == "live" ) datasource.pushData( data.data );
+    else if( data.type == "history" ) datasource.pushHistoryData( data.cid , data.data );
   };
 
   Dashboard.dashboards = [];

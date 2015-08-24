@@ -17,6 +17,8 @@ App.Model.Datasource = ( function() {
     this.chartCount = 0;
     this.charts = {};
     this.end = null;
+
+    this.historyRequests = {};
   };
 
   Datasource.prototype.getNestedValue = function( obj , keyArr ) {
@@ -47,6 +49,7 @@ App.Model.Datasource = ( function() {
     if( this.charts.hasOwnProperty( id ) )
     {
       delete this.charts[ id ];
+      delete this.historyRequests[ id ];
       this.chartCount--;
     }
   };
@@ -73,18 +76,25 @@ App.Model.Datasource = ( function() {
     }
   };
 
+  Datasource.prototype.pushHistoryData = function( chartID , data ) {
+    if( !this.charts.hasOwnProperty( chartID ) || !this.historyRequests.hasOwnProperty( chartID ) ) return;
+
+    if( this.tstampField !== "tstamp" || this.dataField !== "data" )
+    {
+      for( var i = 0; i < data.length; i++ )
+        data[i] = this.convertData( data[i] );
+    }
+
+    this.charts[ chartID ].pushData( this , data , this.historyRequests[ chartID ] );
+    delete this.historyRequests[ chartID ];
+  };
+
   Datasource.prototype.requestHistoryData = function( chart , start , end , callback ) {
-    var self = this;
+    if( !this.charts.hasOwnProperty( chart.id ) || this.historyRequests.hasOwnProperty( chart.id ) ) return;
+    if( typeof callback != "function" ) return;
 
-    $.getJSON( "api/datasources/history?id=" + this.id + "&start=" + start + "&end=" + end ).done( function( data ) {
-      if( self.tstampField !== "tstamp" || self.dataField !== "data" )
-      {
-        for( var i = 0; i < data.length; i++ )
-          data[i] = self.convertData( data[i] );
-      }
-
-      chart.pushData( self , data , callback );
-    } );
+    this.historyRequests[ chart.id ] = callback;
+    App.Net.requestHistoryData( this.id , chart.id , start , end );
   };
 
   Datasource.getDatasources = function() {
