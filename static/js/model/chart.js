@@ -18,7 +18,7 @@ App.Model.Chart = ( function() {
       for( i = 0; i < datasource.dataComponents.length; i++ )
       {
         cconfig = {
-          label : datasource.name + "." + datasource.dataComponents[i]
+          label : config.label + "." + datasource.dataComponents[i]
         };
         this.components.push( new ChartDatasourceComponent( this , datasource.dataComponents[i] , cconfig ) );
       }
@@ -26,7 +26,7 @@ App.Model.Chart = ( function() {
     else
     {
       cconfig = {
-        label : datasource.name
+        label : config.label
       };
       this.components.push( new ChartDatasourceComponent( this , null , cconfig ) );
     }
