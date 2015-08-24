@@ -4,10 +4,56 @@ App.Model = App.Model || {};
 
 App.Model.Chart = ( function() {
 
+  var ChartDatasource = function( parent , datasource , config , componentsIndex )
+  {
+    this.parent = parent;
+    this.datasource = datasource;
+    this.config = config;
+    this.componentsIndex = componentsIndex;
+
+    this.components = [];
+    var cconfig, i;
+    if( datasource.dataComponents )
+    {
+      for( i = 0; i < datasource.dataComponents.length; i++ )
+      {
+        cconfig = {
+          label : datasource.name + "." + datasource.dataComponents[i]
+        };
+        this.components.push( new ChartDatasourceComponent( this , datasource.dataComponents[i] , cconfig ) );
+      }
+    }
+    else
+    {
+      cconfig = {
+        label : datasource.name
+      };
+      this.components.push( new ChartDatasourceComponent( this , null , cconfig ) );
+    }
+  };
+
+  ChartDatasource.prototype.requestHistoryData = function( start , end , callback )
+  {
+    this.datasource.requestHistoryData( this.parent , start , end , callback );
+  };
+
+  var ChartDatasourceComponent = function( datasource , component , config )
+  {
+    this.datasource = datasource;
+    this.component = component;
+    this.config = config;
+  };
+
+  ChartDatasourceComponent.prototype.getData = function( data )
+  {
+    return this.component ? data[ this.component ] : data;
+  };
+
   var Chart = function( data )
   {
     this.pluginInstance = null;
     this.datasourceMap = {};
+    this.components = [];
 
     if( data ) this.unserialize( data );
   };
@@ -59,13 +105,15 @@ App.Model.Chart = ( function() {
 
   Chart.prototype.addDatasource = function( datasource , config )
   {
+    console.log( config );
+
     var index = this.datasources.length;
 
-    this.datasources.push( {
-      datasource : datasource,
-      config : config,
-      index : index
-    } );
+    var chartDatasource = new ChartDatasource( this , datasource , config , this.components.length );
+    this.datasources.push( chartDatasource );
+
+    for( var i = 0; i < chartDatasource.components.length; i++ )
+      this.components.push( chartDatasource.components[i] );
 
     this.datasourceMap[ datasource.id ] = this.datasources[ index ];
   };
@@ -74,15 +122,19 @@ App.Model.Chart = ( function() {
   {
     if( !this.plugin ) return;
     $container.empty();
-    this.pluginInstance = new this.plugin.plugin( $container[0] , this.datasources , this.config );
+    this.pluginInstance = new this.plugin.plugin( $container[0] , this.datasources , this.components , this.config );
   };
 
-  Chart.prototype.pushData = function( datasource , data )
+  Chart.prototype.pushData = function( datasource , data , callback )
   {
     if( this.pluginInstance )
     {
+      if( typeof callback != "function" ) callback = this.pluginInstance.pushData.bind( this.pluginInstance );
       datasource = this.datasourceMap[ datasource.id ];
-      this.pluginInstance.pushData( datasource.index , data );
+      for( var i = 0; i < datasource.components.length; i++ )
+      {
+        callback( datasource.componentsIndex + i , data );
+      }
     }
   };
 

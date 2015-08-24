@@ -4,45 +4,14 @@ App.Model = App.Model || {};
 
 App.Model.Datasource = ( function() {
 
-  var DatasourceComponent = function( datasource , component , config )
-  {
-    this.datasource = datasource;
-    this.component = component;
-    this.config = config;
-  };
-
-  DatasourceComponent.prototype.getData = function( data )
-  {
-    return this.component ? data[ this.component ] : data;
-  };
-
   var Datasource = function( id , config ) {
-    var i, dcConfig;
+    var i;
 
     for( i in config )
       this[i] = config[i];
 
     if( this.tstampField !== "tstamp" ) this.tstampField = this.tstampField.split(".");
     if( this.dataField !== "data" ) this.dataField = this.dataField.split(".");
-
-    if( this.dataComponents )
-    {
-      for( i = 0; i < this.dataComponents.length; i++ )
-      {
-        dcConfig = {
-          label : this.name + "." + this.dataComponents[i]
-        };
-        this.dataComponents[i] = new DatasourceComponent( this , this.dataComponents[i] , dcConfig );
-      }
-      console.log( this.dataComponents );
-    }
-    else
-    {
-      dcConfig = {
-        label : this.name
-      };
-      this.dataComponents = [ new DatasourceComponent( this , null , dcConfig ) ];
-    }
 
     this.id = id;
     this.chartCount = 0;
@@ -104,7 +73,7 @@ App.Model.Datasource = ( function() {
     }
   };
 
-  Datasource.prototype.requestHistoryData = function( index , start , end , callback ) {
+  Datasource.prototype.requestHistoryData = function( chart , start , end , callback ) {
     var self = this;
 
     $.getJSON( "api/datasources/history?id=" + this.id + "&start=" + start + "&end=" + end ).done( function( data ) {
@@ -114,7 +83,7 @@ App.Model.Datasource = ( function() {
           data[i] = self.convertData( data[i] );
       }
 
-      if( typeof callback === "function" ) callback( index , data );
+      chart.pushData( self , data , callback );
     } );
   };
 

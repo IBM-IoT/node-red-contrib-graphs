@@ -97,6 +97,7 @@ App.Controller.Dashboard = ( function() {
     chart.plugin = selectedPlugin;
     chart.datasources = [];
     chart.datasourceMap = {};
+    chart.components = [];
     chart.config = {};
 
     for( i = 0; i < $datasources.length; i++ )
