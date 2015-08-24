@@ -114,3 +114,49 @@ body {
   background-image: none;
   background-color: #3C414A;
 }
+
+.datasourceDataComponents {
+  margin-bottom: 15px;
+}
+
+.datasourceComponent {
+  display: flex;
+  flex-direction: row;
+  height: 24px;
+  padding: 1px;
+}
+
+.datasourceComponentBtn {
+  width: 24px;
+}
+
+.datasourceComponentInputCont {
+  flex: 1;
+  padding-left: 10px;
+}
+
+.datasourceComponentInput {
+  background-color: #2D3137;
+  width: 100%;
+  border: none;
+}
+
+.datasourceComponentInput::-webkit-input-placeholder
+{
+  color: #6a7482;
+}
+
+.datasourceComponentInput:-moz-placeholder
+{
+  color: #6a7482;
+}
+
+.datasourceComponentInput::-moz-placeholder
+{
+  color: #6a7482;
+}
+
+.datasourceComponentInput:-ms-input-placeholder
+{
+  color: #6a7482;
+}

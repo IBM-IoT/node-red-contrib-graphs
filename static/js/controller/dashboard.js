@@ -17,6 +17,7 @@ App.Controller.Dashboard = ( function() {
 
     $( document ).on( "click" , ".gridItemHeader button" , gridHeaderButtonClick );
     $( document ).on( "click" , ".gridItemOverlay button" , removeOverlayButtonClick );
+    $( document ).on( "click" , ".datasourceComponentBtn button" , componentEnableClick );
   }
 
   function createNewChartClick( event )
@@ -106,12 +107,6 @@ App.Controller.Dashboard = ( function() {
 
       var uid = $datasource.attr( "data-uid" );
 
-      datasource.config.label = $( "#nds" + uid + "-label" ).val().trim();
-      if( !datasource.config.label )
-      {
-        datasource.config.label = $datasource.attr( "data-dsname" );
-      }
-
       var $dsConfig = $datasource.find( ".datasourcePluginConfig" );
       for( key in selectedPlugin.datasourceConfig )
       {
@@ -125,6 +120,26 @@ App.Controller.Dashboard = ( function() {
           datasource.config[ key ] = selectedPlugin.datasourceConfig[ key ].default;
         }
       }
+
+      datasource.config.label = $( "#nds" + uid + "-label" ).val().trim();
+      if( !datasource.config.label )
+      {
+        datasource.config.label = $datasource.attr( "data-dsname" );
+      }
+
+      var componentConfig = {};
+      var $components = $datasource.find( ".datasourceComponent" );
+      for( var k = 0; k < $components.length; k++ )
+      {
+        var $component = $( $components[k] );
+        var componentName = $component.attr( "data-component" );
+        componentConfig[ componentName ] = {
+          enabled : $component.find( "button" ).hasClass( "btn-success" ),
+          label : $component.find( "input" ).val().trim()
+        };
+      }
+
+      datasource.config.components = componentConfig;
 
       chart.addDatasource( datasource.datasource , datasource.config );
     }
@@ -207,6 +222,11 @@ App.Controller.Dashboard = ( function() {
       $( "#gridList" ).gridList( "remove" , $parent );
       App.Settings.saveSettings();
     }
+  }
+
+  function componentEnableClick()
+  {
+    $( this ).toggleClass( "btn-success btn-default" );
   }
 
   function gridListOnChange( items )

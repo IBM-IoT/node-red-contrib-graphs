@@ -112,6 +112,31 @@ App.View.Dashboard = ( function() {
         $datasource.find( "#nds" + dsData.uid + "-label" ).val( config.label );
       }
 
+      if( datasource.dataComponents )
+      {
+        var dcTemplate = $.templates( "#tmpl_ChartDatasourceComponent" );
+        var $componentContainer = $( '<div class="datasourceDataComponents"></div>' );
+        $datasource.find( ".panel-body" ).prepend( $componentContainer );
+        for( var i = 0; i < datasource.dataComponents.length; i++ )
+        {
+          var dcData = { name : datasource.dataComponents[i] };
+          $componentContainer.append( dcTemplate.render( dcData ) );
+        }
+
+        if( config && config.components )
+        {
+          for( var key in config.components )
+          {
+            var $component = $componentContainer.find( 'div[data-component="' + key + '"]' );
+            if( $component.length )
+            {
+              if( !config.components[key].enabled ) $component.find( "button" ).toggleClass( "btn-default btn-success" );
+              $component.find( "input" ).val( config.components[key].label );
+            }
+          }
+        }
+      }
+
       if( plugin )
       {
         $datasourceConfig = $datasource.find( ".datasourcePluginConfig" );

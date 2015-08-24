@@ -17,15 +17,26 @@ App.Model.Chart = ( function() {
     {
       for( i = 0; i < datasource.dataComponents.length; i++ )
       {
-        cconfig = {
-          label : config.label + "." + datasource.dataComponents[i]
-        };
+        if( config.components.hasOwnProperty( datasource.dataComponents[i] ) )
+        {
+          cconfig = config.components[ datasource.dataComponents[i] ];
+        }
+        else
+        {
+          cconfig = {
+            enabled : true
+          };
+        }
+
+        if( !cconfig.enabled ) continue;
+        if( !cconfig.label ) cconfig.label = config.label + "." + datasource.dataComponents[i];
         this.components.push( new ChartDatasourceComponent( this , datasource.dataComponents[i] , cconfig ) );
       }
     }
     else
     {
       cconfig = {
+        enabled : true,
         label : config.label
       };
       this.components.push( new ChartDatasourceComponent( this , null , cconfig ) );
@@ -111,7 +122,9 @@ App.Model.Chart = ( function() {
     this.datasources.push( chartDatasource );
 
     for( var i = 0; i < chartDatasource.components.length; i++ )
+    {
       this.components.push( chartDatasource.components[i] );
+    }
 
     this.datasourceMap[ datasource.id ] = this.datasources[ index ];
   };

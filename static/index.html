@@ -152,7 +152,6 @@
     <script id="tmpl_ChartDatasource" type="text/x-jsrender">
       <div data-dsid="{{:id}}" data-dsname="{{:name}}" data-uid="{{:uid}}" class="panel panel-default panel-small">
         <div class="panel-heading panel-clickable">
-          <!-- <button data-act="config" type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-cog"></span></button> -->
           {{:name}}
           <button type="button" class="btn btn-default btn-xs" style="float:right"><span class="glyphicon glyphicon-remove"></span></button>
         </div>
@@ -162,6 +161,17 @@
           </div>
           <div class="datasourcePluginConfig">
           </div>
+        </div>
+      </div>
+    </script>
+
+    <script id="tmpl_ChartDatasourceComponent" type="text/x-jsrender">
+      <div class="datasourceComponent" data-component="{{:name}}">
+        <div class="datasourceComponentBtn">
+          <button type="button" class="btn btn-success btn-xs"><span class="glyphicon glyphicon-ok"></span></button>
+        </div>
+        <div class="datasourceComponentInputCont">
+          <input class="datasourceComponentInput" type="text" placeholder="{{:name}}">
         </div>
       </div>
     </script>
