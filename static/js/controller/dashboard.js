@@ -117,7 +117,7 @@ App.Controller.Dashboard = ( function() {
         datasource.config.label = $datasource.attr( "data-dsname" );
       }
 
-      var $dsConfig = $( "#ds" + uid + "-config" );
+      var $dsConfig = $datasource.find( ".datasourcePluginConfig" );
       for( key in selectedPlugin.datasourceConfig )
       {
         $input = $dsConfig.find( '[data-prop="' + key + '"]' );

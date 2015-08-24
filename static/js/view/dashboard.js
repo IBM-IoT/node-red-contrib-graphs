@@ -164,6 +164,7 @@ App.View.Dashboard = ( function() {
         {
           populatePluginDatasourceConfig(
             $datasourceList.children( 'div[data-dsid="' + chart.datasources[key].datasource.id + '"]' ).find( ".datasourcePluginConfig" ),
+            plugin,
             chart.datasources[key].config
           );
         }

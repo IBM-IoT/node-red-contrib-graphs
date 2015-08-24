@@ -105,8 +105,6 @@ App.Model.Chart = ( function() {
 
   Chart.prototype.addDatasource = function( datasource , config )
   {
-    console.log( config );
-
     var index = this.datasources.length;
 
     var chartDatasource = new ChartDatasource( this , datasource , config , this.components.length );
