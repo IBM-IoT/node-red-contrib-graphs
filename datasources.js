@@ -121,7 +121,7 @@ function handleWSConnection( ws )
   } );
 
   ws.on( "close" , function( code , message ) {
-    if( code != 1000 || code != 1001 )
+    if( code != 1000 && code != 1001 )
     {
       console.log( "WS Connection closed (" + code + ( message ? ", " + message : "" ) + ")" );
     }
