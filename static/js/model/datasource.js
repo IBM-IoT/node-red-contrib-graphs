@@ -4,12 +4,45 @@ App.Model = App.Model || {};
 
 App.Model.Datasource = ( function() {
 
+  var DatasourceComponent = function( datasource , component , config )
+  {
+    this.datasource = datasource;
+    this.component = component;
+    this.config = config;
+  };
+
+  DatasourceComponent.prototype.getData = function( data )
+  {
+    return this.component ? data[ this.component ] : data;
+  };
+
   var Datasource = function( id , config ) {
-    for( var i in config )
+    var i, dcConfig;
+
+    for( i in config )
       this[i] = config[i];
 
     if( this.tstampField !== "tstamp" ) this.tstampField = this.tstampField.split(".");
     if( this.dataField !== "data" ) this.dataField = this.dataField.split(".");
+
+    if( this.dataComponents )
+    {
+      for( i = 0; i < this.dataComponents.length; i++ )
+      {
+        dcConfig = {
+          label : this.name + "." + this.dataComponents[i]
+        };
+        this.dataComponents[i] = new DatasourceComponent( this , this.dataComponents[i] , dcConfig );
+      }
+      console.log( this.dataComponents );
+    }
+    else
+    {
+      dcConfig = {
+        label : this.name
+      };
+      this.dataComponents = [ new DatasourceComponent( this , null , dcConfig ) ];
+    }
 
     this.id = id;
     this.chartCount = 0;
