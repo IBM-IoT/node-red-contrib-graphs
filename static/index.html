@@ -151,10 +151,10 @@
 
     <script id="tmpl_ChartDatasource" type="text/x-jsrender">
       <div data-dsid="{{:id}}" data-dsname="{{:name}}" data-uid="{{:uid}}" class="panel panel-default panel-small">
-        <div class="panel-heading">
-          <button data-act="config" type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-cog"></span></button>
+        <div class="panel-heading panel-clickable">
+          <!-- <button data-act="config" type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-cog"></span></button> -->
           {{:name}}
-          <button data-act="remove" type="button" class="btn btn-default btn-xs" style="float:right"><span class="glyphicon glyphicon-remove"></span></button>
+          <button type="button" class="btn btn-default btn-xs" style="float:right"><span class="glyphicon glyphicon-remove"></span></button>
         </div>
         <div class="panel-body" style="display:none">
           <div class="form-group">

@@ -13,7 +13,6 @@ App.Controller.Dashboard = ( function() {
     $( "#createNewChart" ).on( "click" , createNewChartClick );
     $( "#chartPlugins" ).on( "click" , "a" , chartPluginClick );
     $( "#chartDatasources" ).on( "click" , "a" , chartDatasourceClick );
-    $( "#chartDatasourceList" ).on( "click" , "button" , chartDatasourceButtonClick );
     $( "#chartDone" ).on( "click" , chartDoneClick );
 
     $( document ).on( "click" , ".gridItemHeader button" , gridHeaderButtonClick );
@@ -49,19 +48,15 @@ App.Controller.Dashboard = ( function() {
     App.View.Dashboard.Modal.addDatasource( App.Model.Datasource.getDatasource( id ) , selectedPlugin );
   }
 
-  function chartDatasourceButtonClick( event )
+  function chartDatasourceHeaderClick( event )
   {
-    var action = $( this ).attr( "data-act" );
-    var $parent = $( this ).parents( ".panel" );
+    $( this ).siblings( ".panel-body" ).toggle();
+  }
 
-    if( action == "remove" )
-    {
-      App.View.Dashboard.Modal.removeDatasource( $parent );
-    }
-    else if( action == "config" )
-    {
-      $parent.find( ".panel-body" ).toggle();
-    }
+  function chartDatasourceRemoveClick( event )
+  {
+    event.stopPropagation();
+    App.View.Dashboard.Modal.removeDatasource( $( this ).parents( ".panel" ) );
   }
 
   function chartDoneClick()
@@ -268,6 +263,8 @@ App.Controller.Dashboard = ( function() {
 
   return {
     init : init,
+    chartDatasourceHeaderClick : chartDatasourceHeaderClick,
+    chartDatasourceRemoveClick : chartDatasourceRemoveClick,
     gridListOnChange : gridListOnChange,
     onNetworkMessage : onNetworkMessage,
     loadDashboard : loadDashboard

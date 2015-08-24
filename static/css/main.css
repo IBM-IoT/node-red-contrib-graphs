@@ -101,5 +101,16 @@ body {
 
 .panel.panel-small .panel-heading {
   font-size: 80%;
-  padding: 1px;
+  padding: 1px 1px 1px 10px;
+  height: 24px;
+  line-height: 22px;
+}
+
+.panel-heading.panel-clickable {
+  cursor: pointer;
+}
+
+.panel-heading.panel-clickable:hover {
+  background-image: none;
+  background-color: #3C414A;
 }

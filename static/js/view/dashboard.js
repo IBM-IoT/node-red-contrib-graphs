@@ -118,6 +118,11 @@ App.View.Dashboard = ( function() {
         loadPluginDatasourceConfig( $datasourceConfig , plugin );
         if( config ) populatePluginDatasourceConfig( $datasourceConfig , config );
       }
+
+      var $panelHeading = $datasource.find( ".panel-heading" );
+      var $removeButton = $panelHeading.find( "button" );
+      $panelHeading.on( "click" , App.Controller.Dashboard.chartDatasourceHeaderClick );
+      $removeButton.on( "click" , App.Controller.Dashboard.chartDatasourceRemoveClick );
     }
 
     function removeDatasource( $panel )
