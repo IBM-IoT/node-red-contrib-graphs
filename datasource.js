@@ -27,6 +27,7 @@ module.exports = function(RED)
       this.tstampField = config.tstampField.trim() || "tstamp";
       this.dataField = config.dataField.trim() || "data";
       this.dataComponents = undefined;
+      if( config.disableDiscover ) this.dataComponents = null;
 
       this.clients = [];
       this.currentHistoryRequest = null;

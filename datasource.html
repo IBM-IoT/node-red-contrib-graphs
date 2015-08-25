@@ -1,3 +1,13 @@
+<style>
+  .form-row.checkbox > input[type="checkbox"] {
+    width:10%;
+  }
+
+  .form-row.checkbox > label {
+    width:80%;
+  }
+</style>
+
 <script type="text/javascript">
   RED.nodes.registerType( 'iot-datasource' , {
       category: 'GatewayKit',
@@ -5,7 +15,8 @@
       defaults: {
           name: { value : "" },
           tstampField : { value : "" },
-          dataField : { value : "" }
+          dataField : { value : "" },
+          disableDiscover : { value : false }
       },
       inputs:1,
       outputs:1,
@@ -21,6 +32,10 @@
   <div class="form-row">
     <label for="node-input-name"><i class="icon-tag"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+  <div class="form-row checkbox">
+    <input type="checkbox" id="node-input-disableDiscover">
+    <label for="node-input-disableDiscover">Disable subcomponent discovery</label>
   </div>
   <h5>Timestamp Field</h5>
   <div class="form-row">
