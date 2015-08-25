@@ -29,8 +29,6 @@ module.exports = function(RED)
       this.dataComponents = undefined;
 
       this.clients = [];
-      this.localHistory = [];
-      this.historyMaxLength = config.historyCount;
       this.currentHistoryRequest = null;
       this.historyRequests = {};
 

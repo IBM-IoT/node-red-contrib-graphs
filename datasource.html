@@ -4,7 +4,6 @@
       color: '#cd97d3',
       defaults: {
           name: { value : "" },
-          historyCount: { value : 100 , validate : RED.validators.number() },
           tstampField : { value : "" },
           dataField : { value : "" }
       },
@@ -22,10 +21,6 @@
   <div class="form-row">
     <label for="node-input-name"><i class="icon-tag"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="Name">
-  </div>
-  <div class="form-row">
-    <label for="node-input-historyCount">History Amount</label>
-    <input type="text" id="node-input-historyCount" placeholder="#">
   </div>
   <h5>Timestamp Field</h5>
   <div class="form-row">
