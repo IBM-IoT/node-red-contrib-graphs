@@ -74,6 +74,9 @@ App.View.Dashboard = ( function() {
         }
       }
 
+      $modal.one( "shown.bs.modal" , function() {
+        $( "#chartName" ).focus();
+      } );
       $modal.modal( "show" );
     }
 

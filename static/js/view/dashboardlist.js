@@ -13,6 +13,9 @@ App.View.DashboardList = ( function() {
       $( "#dashboardError" ).hide();
       $( "#dashboardName" ).val( "" );
 
+      $modal.one( "shown.bs.modal" , function() {
+        $( "#dashboardName" ).focus();
+      } );
       $modal.modal( "show" );
     }
 
