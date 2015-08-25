@@ -29,7 +29,6 @@ App.Model.Chart = ( function() {
         }
 
         if( !cconfig.enabled ) continue;
-        if( !cconfig.label ) cconfig.label = config.label + "." + datasource.dataComponents[i];
         this.components.push( new ChartDatasourceComponent( this , datasource.dataComponents[i] , cconfig ) );
       }
     }
@@ -52,7 +51,12 @@ App.Model.Chart = ( function() {
   {
     this.datasource = datasource;
     this.component = component;
-    this.config = config;
+    this.config = {
+      enabled : config.enabled,
+      label : config.label
+    };
+
+    if( !this.config.label ) this.config.label = this.component;
   };
 
   ChartDatasourceComponent.prototype.getData = function( data )
@@ -63,8 +67,7 @@ App.Model.Chart = ( function() {
   var Chart = function( data )
   {
     this.pluginInstance = null;
-    this.datasourceMap = {};
-    this.components = [];
+    this.resetDatasources();
 
     if( data ) this.unserialize( data );
   };
@@ -114,6 +117,18 @@ App.Model.Chart = ( function() {
     }
   };
 
+  Chart.prototype.resetDatasources = function() {
+    this.datasources = [];
+    this.datasourceMap = {};
+    this.components = [];
+
+    this.labelConflicts = {
+      labels : [],
+      conflicts : [],
+      counts : []
+    };
+  };
+
   Chart.prototype.addDatasource = function( datasource , config )
   {
     var index = this.datasources.length;
@@ -123,7 +138,27 @@ App.Model.Chart = ( function() {
 
     for( var i = 0; i < chartDatasource.components.length; i++ )
     {
+      var label = chartDatasource.components[i].config.label;
+
+      var cindex = this.labelConflicts.conflicts.indexOf( label );
+      if( cindex != -1 )
+      {
+        this.labelConflicts.counts[ cindex ]++;
+      }
+      else if( this.labelConflicts.labels.indexOf( label ) != -1 )
+      {
+        cindex = this.labelConflicts.counts.length;
+        this.labelConflicts.conflicts.push( label );
+        this.labelConflicts.counts.push( 2 );
+      }
+
+      if( cindex != -1 )
+      {
+        chartDatasource.components[i].config.label = label + "_" + this.labelConflicts.counts[ cindex ];
+      }
+
       this.components.push( chartDatasource.components[i] );
+      this.labelConflicts.labels.push( chartDatasource.components[i].config.label );
     }
 
     this.datasourceMap[ datasource.id ] = this.datasources[ index ];
