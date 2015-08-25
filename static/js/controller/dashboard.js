@@ -24,6 +24,7 @@ App.Controller.Dashboard = ( function() {
   {
     event.preventDefault();
     selectedPlugin = null;
+    editingChart = null;
     App.View.Dashboard.Modal.open();
   }
 
