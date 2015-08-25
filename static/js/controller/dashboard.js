@@ -255,6 +255,15 @@ App.Controller.Dashboard = ( function() {
     currentDashboard.pushData( data );
   }
 
+  function onNetworkDisconnect()
+  {
+    if( !currentDashboard ) return;
+
+    App.Net.createConnection().done( function() {
+      currentDashboard.subscribeToAllDatasources();
+    } );
+  }
+
   function loadDashboard( dashboard )
   {
     currentDashboard = dashboard;
@@ -286,6 +295,7 @@ App.Controller.Dashboard = ( function() {
     chartDatasourceRemoveClick : chartDatasourceRemoveClick,
     gridListOnChange : gridListOnChange,
     onNetworkMessage : onNetworkMessage,
+    onNetworkDisconnect : onNetworkDisconnect,
     loadDashboard : loadDashboard
   };
 

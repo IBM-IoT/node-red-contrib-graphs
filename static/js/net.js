@@ -38,13 +38,7 @@ App.Net = ( function() {
       ws = null;
       if( event.code === 1000 )
       {
-        createConnection().done( function() {
-          App.Datasource.getDatasources();
-          if( App.Dashboard.currentDashboard !== null )
-          {
-            App.Dashboard.currentDashboard.subscribeToAllDatasources();
-          }
-        } );
+        App.Controller.Dashboard.onNetworkDisconnect();
       }
     };
 
