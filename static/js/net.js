@@ -12,6 +12,7 @@ App.Net = ( function() {
     ws = new WebSocket( "ws://" + location.host + location.pathname + "dsws" );
 
     ws.onopen = function( event ) {
+      App.View.Status.setConnected( true );
       dfd.resolve();
     };
 
@@ -40,11 +41,14 @@ App.Net = ( function() {
       {
         App.Controller.Dashboard.onNetworkDisconnect();
       }
+
+      App.View.Status.setConnected( false );
     };
 
     ws.onerror = function( event ) {
       console.log( "Error" , event );
       ws = null;
+      App.View.Status.setConnected( false );
     };
 
     return dfd.promise();
