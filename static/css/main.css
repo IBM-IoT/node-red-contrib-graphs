@@ -7,6 +7,31 @@ body {
   display : none;
 }
 
+.statusBar {
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+  background-color: #34393C;
+  border-top: solid 1px black;
+  padding: 2px 10px;
+  z-index: 1001;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  height: 24px;
+}
+
+.statusBarConnect {
+  width: 16px;
+  height: 16px;
+  background-image: url( '../images/disconnected.png' );
+  float: right;
+  margin-top: 2px;
+}
+
+.statusBarConnect.connected {
+  background-image: url( '../images/connected.png' );
+}
+
 #navbar-collapsed ul {
   display : none;
 }
