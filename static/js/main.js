@@ -5,9 +5,13 @@ App.Main = ( function() {
 
   function init()
   {
+    App.View.Status.set( "Loading plugins..." );
     App.Plugins.loadPlugins().done( function() {
+      App.View.Status.set( "Fetching datasources..." );
       App.Model.Datasource.getDatasources().done( function() {
+        App.View.Status.set( "Fetching settings..." );
         App.Settings.loadSettings().done( function() {
+          App.View.Status.clear();
           App.View.DashboardList.render( App.Model.Dashboard.dashboards );
         } );
       } );
