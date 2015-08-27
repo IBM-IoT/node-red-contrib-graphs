@@ -61,8 +61,10 @@ App.Controller.DashboardList = ( function() {
   {
     if( !dashboard ) return;
     App.Net.createConnection().done( function() {
-      App.Page.navigateTo( "#dashboardPage" , function() {
-        App.Controller.Dashboard.loadDashboard( dashboard );
+      App.Model.Datasource.getDatasources().done( function() {
+        App.Page.navigateTo( "#dashboardPage" , function() {
+          App.Controller.Dashboard.loadDashboard( dashboard );
+        } );
       } );
     } );
   }
