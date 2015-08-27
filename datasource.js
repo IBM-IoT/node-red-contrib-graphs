@@ -55,6 +55,14 @@ module.exports = function(RED)
             }
             else self.dataComponents = null;
           }
+
+          var configMsg = {
+            type : "config",
+            id : self.id,
+            config : self.getDatasourceConfig()
+          };
+
+          self.sendToAll( JSON.stringify( configMsg ) );
         }
 
         var newData;
@@ -87,15 +95,7 @@ module.exports = function(RED)
           newData = JSON.stringify( newData );
 
           // Send live data to all connected clients
-          for( i = 0; i < self.clients.length; i++ )
-          {
-            if( self.clients[i].ws.readyState == self.clients[i].ws.CLOSED )
-            {
-              self.clients.splice( i-- , 1 );
-              continue;
-            }
-            self.clients[i].ws.send( newData );
-          }
+          this.sendToAll( newData );
         }
 
       } );
@@ -154,6 +154,29 @@ module.exports = function(RED)
             return;
           }
         }
+      };
+
+      this.sendToAll = function( msg )
+      {
+        for( i = 0; i < this.clients.length; i++ )
+        {
+          if( this.clients[i].ws.readyState == this.clients[i].ws.CLOSED )
+          {
+            this.clients.splice( i-- , 1 );
+            continue;
+          }
+          this.clients[i].ws.send( msg );
+        }
+      };
+
+      this.getDatasourceConfig = function()
+      {
+        return {
+          name : this.name,
+          tstampField : this.tstampField,
+          dataField : this.dataField,
+          dataComponents : this.dataComponents
+        };
       };
   }
 

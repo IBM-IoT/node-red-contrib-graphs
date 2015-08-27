@@ -24,12 +24,7 @@ function init( _RED )
         var node = RED.nodes.getNode( nodes[i].id );
         if( !node ) continue;
 
-        data[ node.id ] = {
-          name : node.name,
-          tstampField : node.tstampField,
-          dataField : node.dataField,
-          dataComponents : node.dataComponents
-        };
+        data[ node.id ] = node.getDatasourceConfig();
       }
     }
 
