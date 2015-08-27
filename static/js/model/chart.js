@@ -14,6 +14,7 @@ App.Model.Chart = ( function() {
 
   ChartDatasource.prototype.loadComponents = function()
   {
+    this.components = [];
     var cconfig, i;
     if( this.datasource.dataComponents )
     {
@@ -126,13 +127,6 @@ App.Model.Chart = ( function() {
     this.datasources = [];
     this.datasourceMap = {};
     this.unreadyDatasources = [];
-    this.components = [];
-
-    this.labelConflicts = {
-      labels : [],
-      conflicts : [],
-      counts : []
-    };
   };
 
   Chart.prototype.addDatasource = function( datasource , config )
@@ -148,6 +142,13 @@ App.Model.Chart = ( function() {
 
   Chart.prototype.loadDatasourceComponents = function()
   {
+    this.labelConflicts = {
+      labels : [],
+      conflicts : [],
+      counts : []
+    };
+
+    this.components = [];
     for( var j = 0; j < this.datasources.length; j++ )
     {
       var chartDatasource = this.datasources[j];
@@ -183,13 +184,23 @@ App.Model.Chart = ( function() {
 
   Chart.prototype.datasourceConfigChanged = function( datasource )
   {
-    if( datasource.isReady() )
+    var index = this.unreadyDatasources.indexOf( datasource );
+    if( datasource.isReady() && index != -1 )
     {
-      var index = this.unreadyDatasources.indexOf( datasource );
-      if( index != -1 )
+      this.unreadyDatasources.splice( index , 1 );
+      if( this.$container ) this.load( this.$container );
+    }
+    else if( !datasource.isReady() && index == -1 )
+    {
+      this.unreadyDatasources.push( datasource );
+      if( this.$container )
       {
-        this.unreadyDatasources.splice( index , 1 );
-        if( this.$container ) this.load( this.$container );
+        if( this.pluginInstance )
+        {
+          this.pluginInstance = null;
+          this.$container.empty();
+        }
+        this.load( this.$container );
       }
     }
   };

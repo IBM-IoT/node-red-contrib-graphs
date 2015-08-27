@@ -262,6 +262,7 @@ App.Controller.Dashboard = ( function() {
 
     App.Net.createConnection().done( function() {
       currentDashboard.subscribeToAllDatasources();
+      App.Model.Datasource.getDatasources();
     } );
   }
 
