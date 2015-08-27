@@ -4,12 +4,11 @@ App.Model = App.Model || {};
 
 App.Model.Chart = ( function() {
 
-  var ChartDatasource = function( parent , datasource , config , componentsIndex )
+  var ChartDatasource = function( parent , datasource , config )
   {
     this.parent = parent;
     this.datasource = datasource;
     this.config = config;
-    this.componentsIndex = componentsIndex;
 
     this.components = [];
     var cconfig, i;
@@ -133,40 +132,51 @@ App.Model.Chart = ( function() {
   {
     var index = this.datasources.length;
 
-    var chartDatasource = new ChartDatasource( this , datasource , config , this.components.length );
+    var chartDatasource = new ChartDatasource( this , datasource , config );
     this.datasources.push( chartDatasource );
-
-    for( var i = 0; i < chartDatasource.components.length; i++ )
-    {
-      var label = chartDatasource.components[i].config.label;
-
-      var cindex = this.labelConflicts.conflicts.indexOf( label );
-      if( cindex != -1 )
-      {
-        this.labelConflicts.counts[ cindex ]++;
-      }
-      else if( this.labelConflicts.labels.indexOf( label ) != -1 )
-      {
-        cindex = this.labelConflicts.counts.length;
-        this.labelConflicts.conflicts.push( label );
-        this.labelConflicts.counts.push( 2 );
-      }
-
-      if( cindex != -1 )
-      {
-        chartDatasource.components[i].config.label = label + "_" + this.labelConflicts.counts[ cindex ];
-      }
-
-      this.components.push( chartDatasource.components[i] );
-      this.labelConflicts.labels.push( chartDatasource.components[i].config.label );
-    }
-
     this.datasourceMap[ datasource.id ] = this.datasources[ index ];
+  };
+
+  Chart.prototype.loadDatasourceComponents = function()
+  {
+    for( var j = 0; j < this.datasources.length; j++ )
+    {
+      var chartDatasource = this.datasources[j];
+      chartDatasource.componentsIndex = this.components.length;
+
+      for( var i = 0; i < chartDatasource.components.length; i++ )
+      {
+        var label = chartDatasource.components[i].config.label;
+
+        var cindex = this.labelConflicts.conflicts.indexOf( label );
+        if( cindex != -1 )
+        {
+          this.labelConflicts.counts[ cindex ]++;
+        }
+        else if( this.labelConflicts.labels.indexOf( label ) != -1 )
+        {
+          cindex = this.labelConflicts.counts.length;
+          this.labelConflicts.conflicts.push( label );
+          this.labelConflicts.counts.push( 2 );
+        }
+
+        if( cindex != -1 )
+        {
+          chartDatasource.components[i].config.label = label + "_" + this.labelConflicts.counts[ cindex ];
+        }
+
+        this.components.push( chartDatasource.components[i] );
+        this.labelConflicts.labels.push( chartDatasource.components[i].config.label );
+      }
+    }
   };
 
   Chart.prototype.load = function( $container )
   {
     if( !this.plugin ) return;
+
+    this.loadDatasourceComponents();
+
     $container.empty();
     this.pluginInstance = new this.plugin.plugin( $container[0] , this.datasources , this.components , this.config );
   };
