@@ -104,7 +104,8 @@ App.Model.Chart = ( function() {
     // A bit of backwards compatibility
     if( data.chartPlugin ) data.plugin = data.chartPlugin;
 
-    this.plugin = data.plugin ? App.Plugins.getPlugin( data.plugin ) : null;
+    this.plugin_id = data.plugin;
+    this.plugin = App.Plugins.getPlugin( this.plugin_id );
 
     this.datasources = [];
     for( var i in data.datasources )
@@ -176,7 +177,11 @@ App.Model.Chart = ( function() {
 
   Chart.prototype.load = function( $container )
   {
-    if( !this.plugin ) return;
+    if( !this.plugin )
+    {
+      App.View.Dashboard.showMissingPlugin( $container , this.plugin_id );
+      return;
+    }
 
     if( this.unreadyDatasources.length )
     {

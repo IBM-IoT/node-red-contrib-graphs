@@ -294,7 +294,9 @@ App.View.Dashboard = ( function() {
     var $listItem = $( '#gridList li[data-id="' + chart.id + '"]' );
     $listItem.find( ".gridItemHeader > span" ).text( chart.name );
 
-    return $listItem.find( ".gridItemContent" );
+    var $content = $listItem.find( ".gridItemContent" );
+    $content.empty();
+    return $content;
   }
 
   function showRemoveOverlay( $container )
@@ -316,6 +318,11 @@ App.View.Dashboard = ( function() {
     $overlay.fadeOut( 200 , ( function() {
       this.remove();
     } ).bind( $overlay ) );
+  }
+
+  function showMissingPlugin( $container , plugin_id )
+  {
+    $container.append( '<div class="alert alert-danger">Missing plugin: ' + plugin_id + '</div>' );
   }
 
   function showPendingDatasources( $container , datasources )
@@ -364,6 +371,7 @@ App.View.Dashboard = ( function() {
     updateChartContainer : updateChartContainer,
     showRemoveOverlay : showRemoveOverlay,
     hideRemoveOverlay : hideRemoveOverlay,
+    showMissingPlugin : showMissingPlugin,
     showPendingDatasources : showPendingDatasources,
     getInputValue : getInputValue
   };
