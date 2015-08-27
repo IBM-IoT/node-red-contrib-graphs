@@ -58,6 +58,10 @@ App.Model.Datasource = ( function() {
     return this.chartCount === 0;
   };
 
+  Datasource.prototype.isReady = function() {
+    return this.dataComponents !== undefined;
+  };
+
   Datasource.prototype.convertData = function( data ) {
     var converted = {
       tstamp : this.tstampField == "tstamp" ? data.tstamp : this.getNestedValue( data , this.tstampField ),

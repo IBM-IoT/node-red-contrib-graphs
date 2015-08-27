@@ -318,6 +318,22 @@ App.View.Dashboard = ( function() {
     } ).bind( $overlay ) );
   }
 
+  function showPendingDatasources( $container , datasources )
+  {
+    var $alert = $container.find( ".alert" );
+    if( !$alert.length )
+    {
+      $alert = $( '<div class="alert alert-info"></div>' );
+      $container.append( $alert );
+    }
+
+    var namesHtml = datasources.map( function( d ) {
+      return d.name;
+    } ).join( ', ' );
+
+    $alert.html( '<strong>Waiting on datasources:</strong> ' + namesHtml );
+  }
+
   function getInputValue( $input )
   {
     if( $input.attr( "type" ) === "checkbox" )
@@ -348,6 +364,7 @@ App.View.Dashboard = ( function() {
     updateChartContainer : updateChartContainer,
     showRemoveOverlay : showRemoveOverlay,
     hideRemoveOverlay : hideRemoveOverlay,
+    showPendingDatasources : showPendingDatasources,
     getInputValue : getInputValue
   };
 

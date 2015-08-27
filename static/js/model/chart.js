@@ -119,6 +119,7 @@ App.Model.Chart = ( function() {
   Chart.prototype.resetDatasources = function() {
     this.datasources = [];
     this.datasourceMap = {};
+    this.unreadyDatasources = [];
     this.components = [];
 
     this.labelConflicts = {
@@ -131,6 +132,8 @@ App.Model.Chart = ( function() {
   Chart.prototype.addDatasource = function( datasource , config )
   {
     var index = this.datasources.length;
+
+    if( !datasource.isReady() ) this.unreadyDatasources.push( datasource );
 
     var chartDatasource = new ChartDatasource( this , datasource , config );
     this.datasources.push( chartDatasource );
@@ -174,6 +177,12 @@ App.Model.Chart = ( function() {
   Chart.prototype.load = function( $container )
   {
     if( !this.plugin ) return;
+
+    if( this.unreadyDatasources.length )
+    {
+      App.View.Dashboard.showPendingDatasources( $container , this.unreadyDatasources );
+      return;
+    }
 
     this.loadDatasourceComponents();
 
