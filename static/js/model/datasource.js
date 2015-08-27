@@ -5,13 +5,7 @@ App.Model = App.Model || {};
 App.Model.Datasource = ( function() {
 
   var Datasource = function( id , config ) {
-    var i;
-
-    for( i in config )
-      this[i] = config[i];
-
-    if( this.tstampField !== "tstamp" ) this.tstampField = this.tstampField.split(".");
-    if( this.dataField !== "data" ) this.dataField = this.dataField.split(".");
+    if( config ) this.unserialize( config );
 
     this.id = id;
     this.chartCount = 0;
@@ -19,6 +13,17 @@ App.Model.Datasource = ( function() {
     this.end = null;
 
     this.historyRequests = {};
+  };
+
+  Datasource.prototype.unserialize = function( data )
+  {
+    this.name = data.name;
+    this.tstampField = data.tstampField;
+    this.dataField = data.dataField;
+    this.dataComponents = data.dataComponents;
+
+    if( this.tstampField !== "tstamp" ) this.tstampField = this.tstampField.split(".");
+    if( this.dataField !== "data" ) this.dataField = this.dataField.split(".");
   };
 
   Datasource.prototype.getNestedValue = function( obj , keyArr ) {
