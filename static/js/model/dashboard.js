@@ -101,6 +101,7 @@ App.Model.Dashboard = ( function() {
     var datasource = this.datasources[ data.id ];
     if( data.type == "live" ) datasource.pushData( data.data );
     else if( data.type == "history" ) datasource.pushHistoryData( data.cid , data.data );
+    else if( data.type == "config" ) datasource.updateConfig( data.config );
   };
 
   Dashboard.dashboards = [];

@@ -9,16 +9,19 @@ App.Model.Chart = ( function() {
     this.parent = parent;
     this.datasource = datasource;
     this.config = config;
-
     this.components = [];
+  };
+
+  ChartDatasource.prototype.loadComponents = function()
+  {
     var cconfig, i;
-    if( datasource.dataComponents )
+    if( this.datasource.dataComponents )
     {
-      for( i = 0; i < datasource.dataComponents.length; i++ )
+      for( i = 0; i < this.datasource.dataComponents.length; i++ )
       {
-        if( config.components.hasOwnProperty( datasource.dataComponents[i] ) )
+        if( this.config.components.hasOwnProperty( this.datasource.dataComponents[i] ) )
         {
-          cconfig = config.components[ datasource.dataComponents[i] ];
+          cconfig = this.config.components[ this.datasource.dataComponents[i] ];
         }
         else
         {
@@ -28,14 +31,14 @@ App.Model.Chart = ( function() {
         }
 
         if( !cconfig.enabled ) continue;
-        this.components.push( new ChartDatasourceComponent( this , datasource.dataComponents[i] , cconfig ) );
+        this.components.push( new ChartDatasourceComponent( this , this.datasource.dataComponents[i] , cconfig ) );
       }
     }
     else
     {
       cconfig = {
         enabled : true,
-        label : config.label
+        label : this.config.label
       };
       this.components.push( new ChartDatasourceComponent( this , null , cconfig ) );
     }
@@ -65,6 +68,8 @@ App.Model.Chart = ( function() {
 
   var Chart = function( data )
   {
+    this.$container = null;
+
     this.pluginInstance = null;
     this.resetDatasources();
 
@@ -147,6 +152,7 @@ App.Model.Chart = ( function() {
     {
       var chartDatasource = this.datasources[j];
       chartDatasource.componentsIndex = this.components.length;
+      chartDatasource.loadComponents();
 
       for( var i = 0; i < chartDatasource.components.length; i++ )
       {
@@ -175,8 +181,23 @@ App.Model.Chart = ( function() {
     }
   };
 
+  Chart.prototype.datasourceConfigChanged = function( datasource )
+  {
+    if( datasource.isReady() )
+    {
+      var index = this.unreadyDatasources.indexOf( datasource );
+      if( index != -1 )
+      {
+        this.unreadyDatasources.splice( index , 1 );
+        if( this.$container ) this.load( this.$container );
+      }
+    }
+  };
+
   Chart.prototype.load = function( $container )
   {
+    this.$container = $container;
+
     if( !this.plugin )
     {
       App.View.Dashboard.showMissingPlugin( $container , this.plugin_id );

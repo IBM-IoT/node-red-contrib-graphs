@@ -59,6 +59,13 @@ App.Model.Datasource = ( function() {
     }
   };
 
+  Datasource.prototype.updateConfig = function( config )
+  {
+    this.unserialize( config );
+    for( var id in this.charts )
+      this.charts[ id ].datasourceConfigChanged( this );
+  };
+
   Datasource.prototype.isEmpty = function() {
     return this.chartCount === 0;
   };
@@ -110,9 +117,15 @@ App.Model.Datasource = ( function() {
     var dfd = $.Deferred();
 
     $.getJSON( "api/datasources" ).done( function( datasources ) {
-      Datasource.datasources = {};
+      if( !Datasource.datasources ) Datasource.datasources = {};
+
       for( var id in datasources )
-        Datasource.datasources[ id ] = new Datasource( id , datasources[id] );
+      {
+        if( Datasource.datasources.hasOwnProperty( id ) )
+          Datasource.datasources[ id ].updateConfig( datasources[id] );
+        else
+          Datasource.datasources[ id ] = new Datasource( id , datasources[id] );
+      }
 
       dfd.resolve();
     } );
