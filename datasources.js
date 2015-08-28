@@ -96,7 +96,7 @@ function handleWSConnection( ws )
         node = RED.nodes.getNode( msg.id[i] );
         if( node )
         {
-          node.clients.push( { ws : ws } );
+          node.addClient( { ws : ws } );
         }
       }
     }

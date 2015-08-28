@@ -144,6 +144,23 @@ module.exports = function(RED)
         this.historyRequests[ msg._msgid ] = request;
       };
 
+      this.addClient = function( client )
+      {
+        for( var i = 0; i < this.clients.length; i++ )
+        {
+          if( client.ws == this.clients[i].ws ) return;
+        }
+
+        this.clients.push( client );
+        var configMsg = {
+          type : "config",
+          id : this.id,
+          config : this.getDatasourceConfig()
+        };
+
+        client.ws.send( JSON.stringify( configMsg ) );
+      };
+
       this.removeClient = function( ws )
       {
         for( var i = 0; i < this.clients.length; i++ )
