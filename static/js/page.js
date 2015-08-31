@@ -8,6 +8,18 @@ App.Page = ( function() {
   var currentPage = null, currentPageNav = null;
   var isNavigating = false;
 
+  function init()
+  {
+    navigateTo( location.pathname.replace( "/dash/" , "" ) , false );
+
+    window.onpopstate = onPopState;
+  }
+
+  function onPopState( event )
+  {
+    navigateTo( location.pathname.replace( "/dash/" , "" ) , false );
+  }
+
   function onPageChange( func )
   {
     pageChangeCallbacks.push( func );
@@ -27,7 +39,7 @@ App.Page = ( function() {
       pageChangeCallbacks[i].call( null , newPage , data );
   }
 
-  function navigateTo( newPage , data )
+  function changePage( newPage , data )
   {
     if( isNavigating === true ) return;
     isNavigating = true;
@@ -49,7 +61,17 @@ App.Page = ( function() {
     }
   }
 
+  function navigateTo( path , pushState )
+  {
+    if( pushState || pushState === undefined ) history.pushState( null , "" , path );
+    var pathData = path.split( "/" );
+
+    if( pathData[0] == "board" ) changePage( "#dashboardPage" , pathData[1] );
+    else changePage( "#dashboardListPage" );
+  }
+
   return {
+    init : init,
     onPageChange : onPageChange,
     navigateTo : navigateTo
   };
