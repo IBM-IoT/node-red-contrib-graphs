@@ -18,6 +18,13 @@ App.Controller.Dashboard = ( function() {
     $( document ).on( "click" , ".gridItemHeader button" , gridHeaderButtonClick );
     $( document ).on( "click" , ".gridItemOverlay button" , removeOverlayButtonClick );
     $( document ).on( "click" , ".datasourceComponentBtn button" , componentEnableClick );
+
+    App.Page.onPageChange( onPageChange );
+  }
+
+  function onPageChange( page , data )
+  {
+    if( page == "#dashboardPage" ) loadDashboard( data );
   }
 
   function createNewChartClick( event )

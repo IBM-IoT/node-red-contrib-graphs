@@ -9,6 +9,14 @@ App.Controller.DashboardList = ( function() {
     $( "#createNewDashboard" ).on( "click" , createNewDashboardClick );
     $( "#dashboardDone" ).on( "click" , dashboardDoneClick );
     $( "#dashboardListPage" ).on( "click" , "button" , dashboardButtonClick );
+
+    App.Page.onPageChange( onPageChange );
+  }
+
+  function onPageChange( page , data )
+  {
+    if( page == "#dashboardListPage" )
+      App.View.DashboardList.render( App.Model.Dashboard.dashboards );
   }
 
   function createNewDashboardClick( event )
@@ -62,9 +70,7 @@ App.Controller.DashboardList = ( function() {
     if( !dashboard ) return;
     App.Net.createConnection().done( function() {
       App.Model.Datasource.getDatasources().done( function() {
-        App.Page.navigateTo( "#dashboardPage" , function() {
-          App.Controller.Dashboard.loadDashboard( dashboard );
-        } );
+        App.Page.navigateTo( "#dashboardPage" , dashboard );
       } );
     } );
   }

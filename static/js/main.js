@@ -12,12 +12,11 @@ App.Main = ( function() {
         App.View.Status.set( "Fetching settings..." );
         App.Settings.loadSettings().done( function() {
           App.View.Status.clear();
-          App.View.DashboardList.render( App.Model.Dashboard.dashboards );
+          App.Page.navigateTo( "#dashboardListPage" );
         } );
       } );
     } ).fail( function() {
       $( "#dashboardListPage" ).append( '<div class="alert alert-danger">Error loading plugins.</div>' );
-    } ).always( function() {
       App.Page.navigateTo( "#dashboardListPage" );
     } );
   }

@@ -3,10 +3,17 @@ var App = App || {};
 
 App.Page = ( function() {
 
+  var pageChangeCallbacks = [];
+
   var currentPage = null, currentPageNav = null;
   var isNavigating = false;
 
-  function finishNavigateTo( newPage , loadCallback )
+  function onPageChange( func )
+  {
+    pageChangeCallbacks.push( func );
+  }
+
+  function finishNavigateTo( newPage , data )
   {
     currentPage = $( newPage );
     currentPageNav = $( newPage + "Nav" );
@@ -16,13 +23,11 @@ App.Page = ( function() {
       currentPageNav.show();
     } );
 
-    if( loadCallback && typeof loadCallback == "function" )
-    {
-      loadCallback();
-    }
+    for( var i = 0; i < pageChangeCallbacks.length; i++ )
+      pageChangeCallbacks[i].call( null , newPage , data );
   }
 
-  function navigateTo( newPage , loadCallback )
+  function navigateTo( newPage , data )
   {
     if( isNavigating === true ) return;
     isNavigating = true;
@@ -34,17 +39,18 @@ App.Page = ( function() {
 
     if( currentPage === null )
     {
-      finishNavigateTo( newPage , loadCallback );
+      finishNavigateTo( newPage , data );
     }
     else
     {
       currentPage.fadeOut( 200 , function() {
-        finishNavigateTo( newPage , loadCallback );
+        finishNavigateTo( newPage , data );
       } );
     }
   }
 
   return {
+    onPageChange : onPageChange,
     navigateTo : navigateTo
   };
 
