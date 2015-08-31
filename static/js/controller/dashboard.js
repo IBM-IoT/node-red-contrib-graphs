@@ -24,7 +24,29 @@ App.Controller.Dashboard = ( function() {
 
   function onPageChange( page , data )
   {
-    if( page == "#dashboardPage" ) loadDashboard( data );
+    if( page == "#dashboardPage" )
+    {
+      var dashboard = App.Model.Dashboard.getDashboard( data );
+      if( dashboard )
+      {
+        App.Net.createConnection().done( function() {
+          App.Model.Datasource.getDatasources().done( function() {
+            loadDashboard( dashboard );
+          } );
+        } );
+      }
+    }
+    else
+    {
+      if( currentDashboard )
+      {
+        App.Net.closeConnection();
+        currentDashboard.unload();
+        currentDashboard = null;
+      }
+
+      App.View.Dashboard.Modal.close();
+    }
   }
 
   function createNewChartClick( event )
@@ -276,7 +298,10 @@ App.Controller.Dashboard = ( function() {
   function loadDashboard( dashboard )
   {
     currentDashboard = dashboard;
+    selectedPlugin = null;
+    editingChart = null;
     App.View.Dashboard.setPageTitle( dashboard.name );
+    App.View.Dashboard.createNewGridList();
 
     for( var i in dashboard.charts )
     {

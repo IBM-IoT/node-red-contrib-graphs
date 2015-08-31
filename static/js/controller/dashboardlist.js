@@ -16,7 +16,14 @@ App.Controller.DashboardList = ( function() {
   function onPageChange( page , data )
   {
     if( page == "#dashboardListPage" )
+    {
+      $( "#titleDashboard" ).text( "" );
       App.View.DashboardList.render( App.Model.Dashboard.dashboards );
+    }
+    else
+    {
+      App.View.DashboardList.Modal.close();
+    }
   }
 
   function createNewDashboardClick( event )
@@ -42,7 +49,10 @@ App.Controller.DashboardList = ( function() {
 
     App.Settings.saveSettings();
     App.View.DashboardList.Modal.close();
-    openDashboard( dashboard );
+
+    // HACK: Dashboards don't really have an ID yet, so we can use the dashboards array's length
+    // to get an "ID"
+    openDashboard( App.Model.Dashboard.dashboards.length - 1 );
   }
 
   function dashboardButtonClick()
@@ -50,8 +60,7 @@ App.Controller.DashboardList = ( function() {
     var id = $( this ).attr( "data-open" );
     if( id !== undefined )
     {
-      var dashboard = App.Model.Dashboard.getDashboard( id );
-      openDashboard( dashboard );
+      openDashboard( id );
     }
     else
     {
@@ -65,14 +74,9 @@ App.Controller.DashboardList = ( function() {
     }
   }
 
-  function openDashboard( dashboard )
+  function openDashboard( id )
   {
-    if( !dashboard ) return;
-    App.Net.createConnection().done( function() {
-      App.Model.Datasource.getDatasources().done( function() {
-        App.Page.navigateTo( "#dashboardPage" , dashboard );
-      } );
-    } );
+    App.Page.navigateTo( "board/" + id );
   }
 
   return {
