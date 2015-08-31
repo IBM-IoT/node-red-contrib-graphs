@@ -41,6 +41,13 @@ App.Model.Dashboard = ( function() {
     this.subscribeToAllDatasources();
   };
 
+  Dashboard.prototype.unload = function()
+  {
+    this.active = false;
+    for( var id in this.charts )
+      this.charts[id].unload();
+  };
+
   Dashboard.prototype.getChart = function( id )
   {
     return this.charts.hasOwnProperty( id ) ? this.charts[id] : null;

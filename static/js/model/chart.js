@@ -227,6 +227,12 @@ App.Model.Chart = ( function() {
     this.pluginInstance = new this.plugin.plugin( $container[0] , this.datasources , this.components , this.config );
   };
 
+  Chart.prototype.unload = function()
+  {
+    this.$container = null;
+    this.pluginInstance = null;
+  };
+
   Chart.prototype.pushData = function( datasource , data , callback )
   {
     if( this.pluginInstance )
