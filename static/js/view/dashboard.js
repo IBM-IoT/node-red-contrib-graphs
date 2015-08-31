@@ -245,6 +245,13 @@ App.View.Dashboard = ( function() {
     $( "#titleDashboard" ).text( " : " + title );
   }
 
+  function createNewGridList()
+  {
+    $gridList = null;
+    $( "#gridList" ).remove();
+    $( "#dashboardPage" ).append( '<ul id="gridList"><li class="position-highlight"></li></ul>' );
+  }
+
   function initGridList()
   {
     $gridList = $( "#gridList" );
@@ -366,6 +373,7 @@ App.View.Dashboard = ( function() {
     Modal : Modal,
 
     setPageTitle : setPageTitle,
+    createNewGridList : createNewGridList,
     initGridList : initGridList,
     createChartContainer : createChartContainer,
     updateChartContainer : updateChartContainer,
