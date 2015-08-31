@@ -5,6 +5,11 @@ App.Main = ( function() {
 
   function init()
   {
+    var dfd = $.Deferred();
+
+    for( var i in App.Controller )
+      App.Controller[i].init();
+
     App.View.Status.set( "Loading plugins..." );
     App.Plugins.loadPlugins().done( function() {
       App.View.Status.set( "Fetching datasources..." );
@@ -12,13 +17,15 @@ App.Main = ( function() {
         App.View.Status.set( "Fetching settings..." );
         App.Settings.loadSettings().done( function() {
           App.View.Status.clear();
-          App.Page.navigateTo( "#dashboardListPage" );
+          dfd.resolve();
         } );
       } );
     } ).fail( function() {
       $( "#dashboardListPage" ).append( '<div class="alert alert-danger">Error loading plugins.</div>' );
-      App.Page.navigateTo( "#dashboardListPage" );
+      dfd.resolve();
     } );
+
+    return dfd.promise();
   }
 
   return {
@@ -33,9 +40,8 @@ $( window ).on( "resize" , function( event ) {
 
 $( document ).on( "ready" , function() {
 
-  App.Main.init();
-
-  for( var i in App.Controller )
-    App.Controller[i].init();
+  App.Main.init().done( function() {
+    App.Page.init();
+  } );
 
 } );
