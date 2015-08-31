@@ -1,22 +1,10 @@
 
 var util = require( "util" );
 var dashServer = require( "./server" );
-var plugins = require( "./plugins" );
-var users = require( "./users" );
-var datasources = require( "./datasources" );
 
 module.exports = function(RED)
 {
   dashServer.init( RED );
-
-  plugins.init();
-  RED.httpNode.use( "/dash/api/plugins" , plugins.app );
-
-  users.init();
-  RED.httpNode.use( "/dash/api/user" , users.app );
-
-  datasources.init( RED );
-  RED.httpNode.use( "/dash/api/datasources" , datasources.app );
 
   function Datasource( config )
   {
