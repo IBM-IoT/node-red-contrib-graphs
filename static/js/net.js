@@ -54,6 +54,14 @@ App.Net = ( function() {
     return dfd.promise();
   }
 
+  function closeConnection()
+  {
+    ws.onclose = null;
+    ws.close();
+    ws = null;
+    App.View.Status.setConnected( false );
+  }
+
   function subscribeToDatasources( datasources )
   {
     if( ws === null ) return;
@@ -74,6 +82,7 @@ App.Net = ( function() {
 
   return {
     createConnection : createConnection,
+    closeConnection : closeConnection,
     subscribeToDatasources : subscribeToDatasources,
     unsubscribeFromDatasources : unsubscribeFromDatasources,
     requestHistoryData : requestHistoryData
