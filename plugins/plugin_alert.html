@@ -32,8 +32,9 @@
 <script type="text/javascript">
   ( function() {
 
-    var AlertPlugin = function( container , datasources , config , data ) {
+    var AlertPlugin = function( container , datasources , components , config ) {
       this.datasources = datasources;
+      this.components = components;
 
       this.container = $( container );
 
@@ -43,7 +44,7 @@
 
     AlertPlugin.prototype.pushData = function( index , data ) {
 
-      if( data.data.type === "ok" )
+      if( this.components[ index ].getData( data.data ).type === "ok" )
       {
         this.$alertGlow.removeClass( "animate" );
       }
