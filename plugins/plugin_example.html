@@ -9,25 +9,38 @@
     // Constructor:
     // params
     //  container - HTML Containing Element
-    //  datasources - An array of JSON Objects describing the datasources connected to this chart
-    //    datasources[].datasource - An App.Datasource object
-    //    datasources[].config - JSON object containing the datasource's configuration
+    //  datasources - An array of ChartDatasource objects (model/chart.js)
+    //  components - An array of ChartDatasourceComponent objects (model/chart.js)
     //  config - A JSON object containing the chart's configuration
-    //  data - Initial data ( currently not used )
-    var ExamplePlugin = function( container , datasources , config , data ) {
+    var ExamplePlugin = function( container , datasources , components , config ) {
 
       // Create an inner container, and append it to the outer container provided by the application
       this.container = $( '<div></div>' );
       $( container ).append( this.container );
 
       this.datasources = datasources;
+      this.components = components;
+
       // Go through all datasources
       for( var i = 0; i < this.datasources.length; i++ )
       {
         var datasource = this.datasources[i];
         // Output the datasource's label (name) and whether the custom property we defined (myDatasourceProp) was checked or not
-        this.container.append( 'Datasource #' + i + ': <strong>' + datasource.config.label + '</strong>' +
-                               ', myDatasourceProp checked: <strong>' + ( datasource.config.myDatasourceProp ? 'Yes' : 'No' ) + '</strong><br>' );
+        var datasourceHTML = '<p>Datasource #' + i + ': <strong>' + datasource.config.label + '</strong>' +
+                             ', myDatasourceProp checked: <strong>' + ( datasource.config.myDatasourceProp ? 'Yes' : 'No' ) + '</strong><br>';
+
+        datasourceHTML += 'Components: ';
+        for( var j = 0; j < datasource.components.length; j++ )
+        {
+          if( j > 0 ) datasourceHTML += ', ';
+
+          var component = datasource.components[j];
+          if( !component.component ) datasourceHTML += '(none)';
+          else datasourceHTML += component.config.label + '(' + component.component + ')';
+        }
+        datasourceHTML += '</p>';
+        this.container.append( datasourceHTML );
+
       }
 
       // Output the value of the custom chart property we defined: myProp
@@ -40,7 +53,7 @@
     //  data - One datapoint or an array of datapoints in the same format the datasource node works with.
     //         Each datapoint is a 2-element array [ timestamp , value ].
     ExamplePlugin.prototype.pushData = function( index , data ) {
-      console.log( "[ExamplePlugin][" + index + "]" , data );
+      console.log( "[ExamplePlugin][" + this.components[ index ].config.label + "]" , this.components[ index ].getData( data.data ) );
     };
 
     // Set some plugin options
