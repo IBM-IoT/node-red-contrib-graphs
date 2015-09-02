@@ -1,0 +1,103 @@
+<style>
+.nvd3barContainer {
+  flex: 1;
+}
+
+.nvd3barContainer .nv-legend-text {
+  fill: #aab0b9;
+}
+
+.nvd3barContainer .nvd3.nv-pie path {
+  stroke: none;
+}
+
+.nvd3barContainer .nvd3.nv-noData {
+  fill: #aab0b9;
+}
+
+.nvd3barContainer .nv-axis {
+  fill: #aab0b9;
+}
+
+.nvd3barContainer .nv-axis path {
+  stroke: #4a4e54;
+}
+
+.nvd3barContainer .tick line {
+  stroke: #4a4e54;
+}
+
+.nvd3barContainer .nv-controlsWrap circle {
+  stroke: #cc8700 !important;
+  fill: #cc8700 !important;
+}
+</style>
+
+<script type="text/javascript">
+  ( function() {
+
+    var NVD3Bar = function( container , datasources , components , config ) {
+      this.datasources = datasources;
+      this.components = components;
+      this.config = config;
+
+      this.container = $( '<svg class="nvd3barContainer"></svg>' );
+      $( container ).append( this.container );
+
+      this.data = [];
+
+      this.chart = nv.models.multiBarChart()
+                     .x( function( d ) { return d.label; } )
+                     .y( function( d ) { return d.value; } )
+                     .staggerLabels( false )
+                     .rotateLabels( 0 )
+                     .duration( 100 )
+                     ;
+
+      this.chart.tooltip.enabled( true );
+
+      if( this.config.xLabel ) this.chart.xAxis.axisLabel( this.config.xLabel );
+      if( this.config.yLabel ) this.chart.yAxis.axisLabel( this.config.yLabel );
+
+      this.chart.xAxis.axisLabelDistance( 10 );
+
+      for( var i = 0; i < this.datasources.length; i++ )
+      {
+        this.datasources[i].requestHistoryData( 0 , 0 , this.pushData.bind( this ) );
+        this.data.push( {
+          key : this.datasources[i].config.label,
+          values : []
+        } );
+      }
+
+      d3.select( this.container[0] ).datum( this.data ).transition( 0 ).call( this.chart );
+
+      this.container.parents( "li" ).on( "resize" , this.chart.update );
+    };
+
+    NVD3Bar.prototype.pushData = function( index , data ) {
+      this.data[ index ].values = data.data;
+      this.chart.update();
+    };
+
+    App.Plugins.registerChartType( "nvd3bar" , NVD3Bar , {
+      display_name : "NVD3 Bar",
+      chartConfig : {
+        xLabel : { default : "" },
+        yLabel : { default : "" }
+      }
+    } );
+
+  } )();
+</script>
+
+<script type="text/x-dash" data-chart-config="nvd3bar">
+  <div class="form-group">
+    <label>X Axis Label</label>
+    <input class="form-control" type="text" data-prop="xLabel">
+  </div>
+  <div class="form-group">
+    <label>Y Axis Label</label>
+    <input class="form-control" type="text" data-prop="yLabel">
+  </div>
+</script>

@@ -1,0 +1,61 @@
+<style>
+.nvd3pieContainer {
+  flex: 1;
+}
+
+.nvd3pieContainer .nv-legend-text {
+  fill: #aab0b9;
+}
+
+.nvd3pieContainer .nvd3.nv-pie path {
+  stroke: #292C2F;
+  stroke-width: 2px;
+}
+
+.nvd3pieContainer .nvd3.nv-noData {
+  fill: #aab0b9;
+}
+</style>
+
+<script type="text/javascript">
+  ( function() {
+
+    var NVD3Pie = function( container , datasources , components , config ) {
+      this.datasources = datasources;
+      this.components = components;
+
+      this.container = $( '<svg class="nvd3pieContainer"></svg>' );
+      $( container ).append( this.container );
+
+      this.data = [];
+
+      this.chart = nv.models.pieChart()
+                     .x( function( d ) { return d.label; } )
+                     .y( function( d ) { return d.value; } )
+                     .showLabels( false );
+
+      d3.select( this.container[0] ).datum( this.data ).transition( 0 ).call( this.chart );
+
+      this.datasources[0].requestHistoryData( 0 , 0 , this.pushData.bind( this ) );
+
+      this.container.parents( "li" ).on( "resize" , this.chart.update );
+    };
+
+    NVD3Pie.prototype.pushData = function( index , data ) {
+      if( index !== 0 ) return;
+
+      this.data = data.data;
+      d3.select( this.container[0] ).datum( this.data );
+      this.chart.update();
+    };
+
+    App.Plugins.registerChartType( "nvd3pie" , NVD3Pie , {
+      dependencies : [
+        "plugins/lib/nvd3/nv.d3.min.js",
+        "plugins/lib/nvd3/nv.d3.css"
+      ],
+      display_name : "NVD3 Pie"
+    } );
+
+  } )();
+</script>

@@ -1,0 +1,112 @@
+<style>
+.nvd3scatterContainer {
+  flex: 1;
+}
+
+.nvd3scatterContainer .nv-legend-text {
+  fill: #aab0b9;
+}
+
+.nvd3scatterContainer .nvd3.nv-pie path {
+  stroke: none;
+}
+
+.nvd3scatterContainer .nvd3.nv-noData {
+  fill: #aab0b9;
+}
+
+.nvd3scatterContainer .nv-axis {
+  fill: #aab0b9;
+}
+
+.nvd3scatterContainer .nv-axis path {
+  stroke: #4a4e54;
+}
+
+.nvd3scatterContainer .tick line {
+  stroke: #4a4e54;
+}
+</style>
+
+<script type="text/javascript">
+  ( function() {
+
+    var NVD3Scatter = function( container , datasources , components , config ) {
+      this.datasources = datasources;
+      this.components = components;
+      this.config = config;
+
+      this.container = $( '<svg class="nvd3scatterContainer"></svg>' );
+      $( container ).append( this.container );
+
+      this.data = [];
+
+      this.chart = nv.models.scatterChart()
+                     .duration( 100 )
+                     ;
+
+      this.chart.tooltip.enabled( true );
+
+      if( this.config.xLabel ) this.chart.xAxis.axisLabel( this.config.xLabel );
+      if( this.config.yLabel ) this.chart.yAxis.axisLabel( this.config.yLabel );
+
+      this.chart.xAxis.tickFormat( d3.format( '.2f' ) );
+      this.chart.yAxis.tickFormat( d3.format( '.2f' ) );
+
+      for( var i = 0; i < this.datasources.length; i++ )
+      {
+        this.datasources[i].requestHistoryData( 0 , 0 , this.pushData.bind( this ) );
+        this.data.push( {
+          key : this.datasources[i].config.label,
+          values : []
+        } );
+      }
+
+      d3.select( this.container[0] ).datum( this.data ).transition( 0 ).call( this.chart );
+
+      this.container.parents( "li" ).on( "resize" , this.chart.update );
+    };
+
+    NVD3Scatter.prototype.pushData = function( index , data ) {
+      this.data[ index ].values = data.data;
+
+      if( this.components[ index ].datasource.config.trend )
+      {
+        var regressionResult = ss.linearRegression( data.data.map( function( v ) { return [ v.x , v.y ]; } ) );
+        this.data[ index ].slope = regressionResult.m;
+        this.data[ index ].intercept = regressionResult.b;
+      }
+
+      this.chart.update();
+    };
+
+    App.Plugins.registerChartType( "nvd3scatter" , NVD3Scatter , {
+      display_name : "NVD3 Scatter Plot",
+      chartConfig : {
+        xLabel : { default : "" },
+        yLabel : { default : "" }
+      },
+      datasourceConfig : {
+        trend : { default : false }
+      }
+    } );
+
+  } )();
+</script>
+
+<script type="text/x-dash" data-chart-config="nvd3scatter">
+  <div class="form-group">
+    <label>X Axis Label</label>
+    <input class="form-control" type="text" data-prop="xLabel">
+  </div>
+  <div class="form-group">
+    <label>Y Axis Label</label>
+    <input class="form-control" type="text" data-prop="yLabel">
+  </div>
+</script>
+
+<script type="text/x-dash" data-datasource-config="nvd3scatter">
+  <div class="checkbox">
+    <label><input type="checkbox" data-prop="trend"> Show trend</label>
+  </div>
+</script>
