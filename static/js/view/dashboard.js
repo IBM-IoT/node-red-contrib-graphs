@@ -258,7 +258,7 @@ App.View.Dashboard = ( function() {
     $gridList.gridList( {
       rows : 4,
       vertical : true,
-      widthHeightRatio : 0.65,
+      widthHeightRatio : 0.62,
       onChange : App.Controller.Dashboard.gridListOnChange
     } , {
       handle : ".gridItemHeader",
