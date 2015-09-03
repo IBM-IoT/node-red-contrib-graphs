@@ -115,7 +115,7 @@ App.View.Dashboard = ( function() {
         $datasource.find( "#nds" + dsData.uid + "-label" ).val( config.label );
       }
 
-      if( datasource.dataComponents )
+      if( datasource.dataComponents && !plugin.disableComponentDiscovery )
       {
         $datasource.find( "#nds" + dsData.uid + "-label" ).hide();
 

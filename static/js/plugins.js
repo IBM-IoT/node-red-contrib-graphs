@@ -61,7 +61,8 @@ App.Plugins = ( function() {
       display_name : options.display_name || id,
       plugin : chart,
       chartConfig : options.chartConfig || {},
-      datasourceConfig : options.datasourceConfig || {}
+      datasourceConfig : options.datasourceConfig || {},
+      disableComponentDiscovery : options.disableComponentDiscovery
     };
 
     chartTypes[ id ] = plugin;
