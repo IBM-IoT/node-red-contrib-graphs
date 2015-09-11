@@ -48,5 +48,23 @@
 </script>
 
 <script type="text/x-red" data-help-name="iot-datasource">
-    <p>Main graph node. More intel later.</p>
+    <p>IoT Gateway Kit Datasource node.</p>
+    <h4><strong>Configuration</strong></h4>
+    <p><strong>Disable subcomponent discovery</strong> - If checked, the datasource will not attempt to look inside the data field and split it into subfields.
+    For example, if your data format looks something like this...</p>
+    <pre><code>msg.payload = {
+  tstamp: 1438637044000,
+  data: {
+    x: 3.14,
+    y: 1.41,
+    z: 6.02
+  }
+}</code></pre>
+    <p>... having discovery enabled will allow the datasource to go inside <code>msg.payload.data</code> and find the fields <code>x</code>, <code>y</code>, and
+    <code>z</code>, and present them to the Dashboard as separate data points. If disabled, however, the Dashboard will receive the entire JSON Object
+    <code>msg.payload.data</code> as one data point.<br>
+    A line chart might need them split up so it can chart the data points separately, but a 3d scattered plot would need the data intact, since the entire object
+    would represent just one data point on the plot.</p>
+    <p><strong>Timestamp Field</strong> - The JSON field the UNIX timestamp is located at<br>(default: <code>msg.payload.tstamp</code>)</p>
+    <p><strong>Data Field</strong> - The JSON field the data is located at<br>(default: <code>msg.payload.data</code>)</p>
 </script>
