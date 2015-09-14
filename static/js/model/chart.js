@@ -133,7 +133,7 @@ App.Model.Chart = ( function() {
   {
     var index = this.datasources.length;
 
-    if( !datasource.isReady() && !this.plugin.disableComponentDiscovery ) this.unreadyDatasources.push( datasource );
+    if( !datasource.isReady() && this.plugin && !this.plugin.disableComponentDiscovery ) this.unreadyDatasources.push( datasource );
 
     var chartDatasource = new ChartDatasource( this , datasource , config );
     this.datasources.push( chartDatasource );
@@ -190,7 +190,7 @@ App.Model.Chart = ( function() {
       this.unreadyDatasources.splice( index , 1 );
       if( this.$container ) this.load( this.$container );
     }
-    else if( !datasource.isReady() && index == -1 && !this.plugin.disableComponentDiscovery  )
+    else if( !datasource.isReady() && index == -1 && this.plugin && !this.plugin.disableComponentDiscovery  )
     {
       this.unreadyDatasources.push( datasource );
       if( this.$container )
