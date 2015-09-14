@@ -26,6 +26,7 @@ function init()
 
   app.get( "/settings" , function( request , response ) {
 
+    response.setHeader( "Content-Type" , "application/json" );
     response.end( JSON.stringify( getSettings( "default" ) ) );
 
   } );

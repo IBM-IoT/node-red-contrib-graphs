@@ -11,6 +11,7 @@ function init()
 {
   app.get( "/" , function( request , response ) {
     dashPluginData = loadPlugins( pluginFiles );
+    response.setHeader( "Content-Type" , "text/html" );
     response.end( dashPluginData );
   } );
 
