@@ -1,0 +1,74 @@
+<script type="text/javascript">
+  ( function() {
+
+    var JustGagePlugin = function( container , datasources , components , config ) {
+      this.datasources = datasources;
+      this.components = components;
+      this.config = config;
+
+      this.config.min = parseInt( this.config.min );
+      this.config.max = parseInt( this.config.max );
+      if( isNaN( this.config.min ) ) this.config.min = 0;
+      if( isNaN( this.config.max ) ) this.config.max = 100;
+      if( this.config.min >= this.config.max )
+      {
+        this.config.min = 0;
+        this.config.max = 100;
+      }
+
+      this.container = $( container );
+
+      this.gauge = new JustGage( {
+        parentNode : this.container[0],
+        value : this.config.min,
+        min: this.config.min,
+        max: this.config.max,
+        label: this.config.label,
+        title: "",
+        valueFontColor: "#aab0b9",
+        relativeGaugeSize: true,
+        decimals: 1
+      } );
+
+      // Firefox fix: SVG elements using links when a <base> tag is present
+      this.container.find( "path" ).each( function() {
+        $( this ).attr( "filter" , $( this ).attr( "filter" ).replace( "#" , window.location.pathname + "#" ) );
+      } );
+    };
+
+    JustGagePlugin.prototype.pushData = function( index , data ) {
+      if( index !== 0 ) return;
+
+      this.gauge.refresh( this.components[ index ].getData( data.data ) );
+    };
+
+    App.Plugins.registerChartType( "justgage" , JustGagePlugin , {
+      dependencies : [
+        "plugins/lib/justgage/justgage-1.1.0.min.js",
+        "plugins/lib/justgage/raphael-2.1.4.min.js"
+      ],
+      display_name : "Gauge",
+      chartConfig : {
+        min : { default : "0" },
+        max : { default : "100" },
+        label : { default : "" }
+      }
+    } );
+
+  } )();
+</script>
+
+<script type="text/x-dash" data-chart-config="justgage">
+  <div class="form-group">
+    <label>Minimum Value</label>
+    <input class="form-control" type="text" data-prop="min">
+  </div>
+  <div class="form-group">
+    <label>Maximum Value</label>
+    <input class="form-control" type="text" data-prop="max">
+  </div>
+  <div class="form-group">
+    <label>Label</label>
+    <input class="form-control" type="text" data-prop="label">
+  </div>
+</script>
