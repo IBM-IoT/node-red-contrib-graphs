@@ -7,6 +7,8 @@ var plugins = require( "./plugins" );
 var users = require( "./users" );
 var datasources = require( "./datasources" );
 
+var app = express();
+
 function init( RED )
 {
   fs.readFile( __dirname + "/template/index.mst" , function( err , data ) {
@@ -19,20 +21,22 @@ function init( RED )
   } );
 
   RED.log.info( "Dashboard up and running" );
-  RED.httpNode.use( "/dash" , express.static( __dirname + "/static" ) );
+  app.use( "/" , express.static( __dirname + "/static" ) );
 
   plugins.init();
-  RED.httpNode.use( "/dash/api/plugins" , plugins.app );
+  app.use( "/api/plugins" , plugins.app );
 
   users.init();
-  RED.httpNode.use( "/dash/api/user" , users.app );
+  app.use( "/api/user" , users.app );
 
   datasources.init( RED );
-  RED.httpNode.use( "/dash/api/datasources" , datasources.app );
+  app.use( "/api/datasources" , datasources.app );
 
-  RED.httpNode.get( "/dash/*" , function( request , response ) {
+  app.get( "*" , function( request , response ) {
     response.sendfile( __dirname + "/static/index.html" );
   } );
+
+  RED.httpNode.use( "/dash/" , app );
 }
 
 module.exports = {
