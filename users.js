@@ -1,6 +1,7 @@
 
 var libURL = require( "url" );
 var fs = require( "fs" );
+var path = require( "path" );
 var express = require( "express" );
 
 var app = express();
@@ -8,9 +9,10 @@ var app = express();
 var settings = {};
 var cfgDir;
 
-function init()
+function init( RED )
 {
-  cfgDir = __dirname + "/.dash";
+  var oldCfgDir = __dirname + "/.dash";
+  cfgDir = path.join( RED.settings.userDir , ".dash" );
 
   try
   {
@@ -21,6 +23,29 @@ function init()
     if( e.code != "EEXIST" )
     {
       console.error( "Unable to create .dash dir in " + __dirname );
+      return;
+    }
+  }
+
+  var oldCfgData = null;
+  try
+  {
+    oldCfgData = fs.readFileSync( path.join( oldCfgDir , "config_default.json" ) );
+  }
+  catch( e ) {}
+
+  if( oldCfgData )
+  {
+    try
+    {
+      fs.unlinkSync( path.join( oldCfgDir , "config_default.json" ) );
+      fs.rmdirSync( oldCfgDir );
+      fs.writeFileSync( getSettingsFilename( "default" ) , oldCfgData );
+      RED.log.info( "Moved dashboard config to " + cfgDir );
+    }
+    catch( e )
+    {
+      console.error( "Unable to move old config file: " + e.message );
     }
   }
 

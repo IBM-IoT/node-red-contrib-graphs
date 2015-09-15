@@ -26,7 +26,7 @@ function init( RED )
   plugins.init();
   app.use( "/api/plugins" , plugins.app );
 
-  users.init();
+  users.init( RED );
   app.use( "/api/user" , users.app );
 
   datasources.init( RED );
