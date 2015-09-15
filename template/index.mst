@@ -56,7 +56,7 @@
     </nav>
 
     <div class="statusBar">
-      &nbsp;<span id="statusBarMessage"></span>
+      <div id="statusBarMessage">&nbsp;</div>
       <div class="statusBarConnect"></div>
     </div>
 

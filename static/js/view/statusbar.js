@@ -12,7 +12,7 @@ App.View.Status = ( function() {
 
   function clear()
   {
-    $( "#statusBarMessage" ).text( "" );
+    $( "#statusBarMessage" ).html( "&nbsp;" );
   }
 
   function setConnected( connected )
