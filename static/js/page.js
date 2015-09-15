@@ -7,17 +7,19 @@ App.Page = ( function() {
 
   var currentPage = null, currentPageNav = null;
   var isNavigating = false;
+  var baseUrl = "/dash/";
 
   function init()
   {
-    navigateTo( location.pathname.replace( "/dash/" , "" ) , false );
+    baseUrl = $( "base" ).attr( "href" ) || "/dash/";
+    navigateTo( location.pathname.replace( baseUrl , "" ) , false );
 
     window.onpopstate = onPopState;
   }
 
   function onPopState( event )
   {
-    navigateTo( location.pathname.replace( "/dash/" , "" ) , false );
+    navigateTo( location.pathname.replace( baseUrl , "" ) , false );
   }
 
   function onPageChange( func )
