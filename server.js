@@ -8,16 +8,13 @@ var users = require( "./users" );
 var datasources = require( "./datasources" );
 
 var app = express();
+var renderedIndex = "";
 
 function init( RED )
 {
   fs.readFile( __dirname + "/template/index.mst" , function( err , data ) {
     if( err ) throw err;
-
-    var rendered = Mustache.render( data.toString() , { baseUrl : RED.settings.get( "httpNodeRoot" ) } );
-    fs.writeFile( __dirname + "/static/index.html" , rendered , function( err ) {
-      if( err ) throw err;
-    } );
+    renderedIndex = Mustache.render( data.toString() , { baseUrl : RED.settings.get( "httpNodeRoot" ) } );
   } );
 
   RED.log.info( "Dashboard up and running" );
@@ -33,7 +30,7 @@ function init( RED )
   app.use( "/api/datasources" , datasources.app );
 
   app.get( "*" , function( request , response ) {
-    response.sendfile( __dirname + "/static/index.html" );
+    response.send( renderedIndex );
   } );
 
   RED.httpNode.use( "/dash/" , app );
