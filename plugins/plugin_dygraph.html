@@ -9,8 +9,7 @@
       $( container ).append( this.container );
 
       this.config = config;
-      this.config.history = parseInt( this.config.history );
-      if( isNaN( this.config.history ) ) this.config.history = 1200000;
+
       this.limit = parseInt( this.config.dataLimit );
       if( !isNaN( this.limit ) )
       {
@@ -22,10 +21,20 @@
       this.data = [];
       this.graph = null;
 
-      var now = ( new Date() ).getTime();
-      for( var i = 0; i < this.datasources.length; i++ )
+      this.historyAmount = parseInt( this.config.historyAmount );
+      this.historyUnit = parseInt( this.config.historyUnit );
+      if( !isNaN( this.historyAmount ) )
       {
-        this.datasources[i].requestHistoryData( now - this.config.history , now - 2000 , this.addHistoryData.bind( this ) );
+        var increments = [ 1000 , 60 , 60 , 24 , 30 ];
+        var i;
+        for( i = 0; i <= this.historyUnit; i++ )
+          this.historyAmount *= increments[i];
+
+        var now = ( new Date() ).getTime();
+        for( i = 0; i < this.datasources.length; i++ )
+        {
+          this.datasources[i].requestHistoryData( now - this.historyAmount , now , this.addHistoryData.bind( this ) );
+        }
       }
 
       $( container ).parents( "li" ).on( "resize" , this._resize.bind( this ) );
@@ -188,6 +197,8 @@
       ],
       display_name : "Line/Area Chart",
       chartConfig : {
+        historyUnit : { default : "" },
+        historyAmount : { default : "" },
         xLabel : { default : "" },
         yLabel : { default : "" },
         dataLimit : { default : "" }
@@ -201,6 +212,27 @@
 </script>
 
 <script type="text/x-dash" data-chart-config="dygraph">
+  <div class="form-horizontal">
+  <label>Request data between now and...</label>
+    <div class="form-group">
+      <div class="col-md-8">
+        <input class="form-control" type="text" data-prop="historyAmount">
+      </div>
+      <div class="col-md-4">
+        <select class="form-control" data-prop="historyUnit">
+          <option value="0">second(s) ago</option>
+          <option value="1">minute(s) ago</option>
+          <option value="2">hour(s) ago</option>
+          <option value="3">day(s) ago</option>
+          <option value="4">month(s) ago</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="c-dataLimit">Maximum number of datapoints (leave blank for no limit)</label>
+    <input class="form-control" type="text" id="c-dataLimit" data-prop="dataLimit">
+  </div>
   <div class="form-group">
     <label for="c-xLabel">X Axis Label</label>
     <input class="form-control" type="text" id="c-xLabel" data-prop="xLabel">
@@ -208,10 +240,6 @@
   <div class="form-group">
     <label for="c-yLabel">Y Axis Label</label>
     <input class="form-control" type="text" id="c-yLabel" data-prop="yLabel">
-  </div>
-  <div class="form-group">
-    <label for="c-dataLimit">Data Limit (leave blank for no limit)</label>
-    <input class="form-control" type="text" id="c-dataLimit" data-prop="dataLimit">
   </div>
 </script>
 
