@@ -5,7 +5,7 @@
       this.datasources = datasources;
       this.components = components;
 
-      this.container = $( '<div style="flex:1"></div>' )[0];
+      this.container = $( '<div style="-webkit-flex:1;flex:1"></div>' )[0];
       $( container ).append( this.container );
 
       this.config = config;
@@ -79,6 +79,7 @@
             color : "#EEE",
             padding : "5px"
           },
+          labelsSeparateLines : true,
           legend : "always",
           colorValue : 0.7,
           colorSaturation : 0.6
@@ -107,6 +108,12 @@
 
     MyGraph.prototype.pushData = function( index , data ) {
       if( index < 0 || index >= this.components.length ) return;
+
+      if( $.isArray( data ) )
+      {
+        this.addHistoryData( index , data );
+        return;
+      }
 
       var lastElem = this.data.length > 0 ? this.data[ this.data.length - 1 ] : null;
       if( lastElem === null || lastElem[0].getTime() < data.tstamp )

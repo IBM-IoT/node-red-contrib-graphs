@@ -65,7 +65,9 @@ body {
 }
 
 #gridList li {
+  display: -webkit-flex;
   display: flex;
+  -webkit-flex-direction: column;
   flex-direction: column;
   padding: 0;
   position: absolute;
@@ -93,8 +95,11 @@ body {
 }
 
 .gridItemContent {
+  -webkit-flex: 1;
   flex: 1;
+  display: -webkit-flex;
   display: flex;
+  -webkit-flex-direction: column;
   flex-direction: column;
   padding: 5px;
   background-color: #292C2F;
@@ -149,7 +154,9 @@ body {
 }
 
 .datasourceComponent {
+  display: -webkit-flex;
   display: flex;
+  -webkit-direction: row;
   flex-direction: row;
   height: 24px;
   padding: 1px;
@@ -160,6 +167,7 @@ body {
 }
 
 .datasourceComponentInputCont {
+  -webkit-flex: 1;
   flex: 1;
   padding-left: 10px;
 }
