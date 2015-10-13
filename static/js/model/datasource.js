@@ -75,6 +75,17 @@ App.Model.Datasource = ( function() {
   };
 
   Datasource.prototype.convertData = function( data ) {
+    if( $.isArray( data ) )
+    {
+      for( var i = 0; i < data.length; i++ )
+        data[i] = this.convertDataPoint( data[i] );
+
+      return data;
+    }
+    else return this.convertDataPoint( data );
+  };
+
+  Datasource.prototype.convertDataPoint = function( data ) {
     var converted = {
       tstamp : this.tstampField == "tstamp" ? data.tstamp : this.getNestedValue( data , this.tstampField ),
       data : this.dataField == "data" ? data.data : this.getNestedValue( data , this.dataField )
@@ -97,8 +108,7 @@ App.Model.Datasource = ( function() {
 
     if( this.tstampField !== "tstamp" || this.dataField !== "data" )
     {
-      for( var i = 0; i < data.length; i++ )
-        data[i] = this.convertData( data[i] );
+      data = this.convertData( data );
     }
 
     this.charts[ chartID ].pushData( this , data , this.historyRequests[ chartID ] );

@@ -25,6 +25,17 @@ module.exports = function(RED)
 
         if( !msg.hasOwnProperty( "payload" ) ) return;
 
+        if( typeof msg.payload == "string" && msg.payload == "reset" )
+        {
+          self.dataComponents = undefined;
+          self.sendToAll( JSON.stringify( {
+            type : "config",
+            id : self.id,
+            config : self.getDatasourceConfig()
+          } ) );
+          return;
+        }
+
         // Deduce(?) data components
         if( self.dataComponents === undefined )
         {
