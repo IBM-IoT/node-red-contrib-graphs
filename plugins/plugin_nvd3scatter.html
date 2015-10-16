@@ -68,11 +68,12 @@
     };
 
     NVD3Scatter.prototype.pushData = function( index , data ) {
-      this.data[ index ].values = data.data;
+      if( $.isArray( data.data ) ) this.data[ index ].values = this.data[ index ].values.concat( data.data );
+      else this.data[ index ].values.push( data.data );
 
       if( this.components[ index ].datasource.config.trend )
       {
-        var regressionResult = ss.linearRegression( data.data.map( function( v ) { return [ v.x , v.y ]; } ) );
+        var regressionResult = ss.linearRegression( this.data[ index ].values.map( function( v ) { return [ v.x , v.y ]; } ) );
         this.data[ index ].slope = regressionResult.m;
         this.data[ index ].intercept = regressionResult.b;
       }
