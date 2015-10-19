@@ -1,0 +1,37 @@
+<script type="text/javascript">
+  ( function() {
+
+    var CircleGauge = function( container , datasources , components , config ) {
+      this.datasources = datasources;
+      this.components = components;
+      this.config = config;
+
+      this.container = $( '<div style="-webkit-flex:1;flex:1"></div>' )[0];
+      $( container ).append( this.container );
+
+      this.data = [];
+      this.gauge = new CG.CircleGauge( this.container , {} );
+
+      $( this.container ).parents( "li" ).on( "resize" , this._resize.bind( this ) );
+    };
+
+    CircleGauge.prototype._resize = function() {
+      $( this.container ).css( "height" , "0" );
+      this.gauge.resize();
+    };
+
+    CircleGauge.prototype.pushData = function( index , data ) {
+      if( index !== 0 ) return;
+
+      this.gauge.updateValue( this.components[ index ].getData( data.data ) );
+    };
+
+    App.Plugins.registerChartType( "circleGauge" , CircleGauge , {
+      dependencies : [
+        "plugins/lib/circleGauge.js"
+      ],
+      display_name : "Circle Gauge"
+    } );
+
+  } )();
+</script>
