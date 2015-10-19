@@ -145,8 +145,7 @@ App.View.Dashboard = ( function() {
       if( plugin )
       {
         $datasourceConfig = $datasource.find( ".datasourcePluginConfig" );
-        loadPluginDatasourceConfig( $datasourceConfig , plugin );
-        if( config ) populatePluginDatasourceConfig( $datasourceConfig , config );
+        loadPluginDatasourceConfig( $datasourceConfig , plugin , config );
       }
 
       var $panelHeading = $datasource.find( ".panel-heading" );
@@ -173,9 +172,10 @@ App.View.Dashboard = ( function() {
       var $container = $( "#chartPluginConfig" );
       $container.empty();
 
-      var $datasourceList = $( "#chartDatasourceList" );
-      $datasourceList.find( ".datasourcePluginConfig" ).each( function() {
-        loadPluginDatasourceConfig( $( this ) , plugin );
+      $( "#chartDatasourceList > div" ).each( function() {
+        var dsConfig = null;
+        if( chart ) dsConfig = chart.datasourceMap[ $( this ).attr( "data-dsid" ) ].config;
+        loadPluginDatasourceConfig( $( this ).find( ".datasourcePluginConfig" ) , plugin , dsConfig );
       } );
 
       var $template = $( 'script[data-chart-config="' + plugin.id + '"]' );
@@ -183,30 +183,22 @@ App.View.Dashboard = ( function() {
 
       $container.html( $template.text() );
 
-      if( chart && chart.plugin === plugin )
+      var key;
+      for( key in plugin.chartConfig )
       {
-        var key;
-        for( key in plugin.chartConfig )
+        var $input = $container.find( '[data-prop="' + key + '"]' );
+        if( chart && chart.plugin === plugin && chart.config.hasOwnProperty( key ) )
         {
-          if( chart.config.hasOwnProperty( key ) )
-          {
-            var $input = $container.find( '[data-prop="' + key + '"]' );
-            setInputValue( $input , chart.config[ key ] );
-          }
+          setInputValue( $input , chart.config[ key ] );
         }
-
-        for( key in chart.datasources )
+        else
         {
-          populatePluginDatasourceConfig(
-            $datasourceList.children( 'div[data-dsid="' + chart.datasources[key].datasource.id + '"]' ).find( ".datasourcePluginConfig" ),
-            plugin,
-            chart.datasources[key].config
-          );
+          setInputValue( $input , plugin.chartConfig[ key ].default );
         }
       }
     }
 
-    function loadPluginDatasourceConfig( $container , plugin )
+    function loadPluginDatasourceConfig( $container , plugin , config )
     {
       $container.empty();
 
@@ -214,20 +206,20 @@ App.View.Dashboard = ( function() {
       if( !$template.length ) return;
 
       $container.html( $template.text() );
-    }
 
-    function populatePluginDatasourceConfig( $container , plugin , config )
-    {
       for( var key in plugin.datasourceConfig )
       {
-        if( !config.hasOwnProperty( key ) ) continue;
-
         var $input = $container.find( '[data-prop="' + key + '"]' );
-        setInputValue( $input , config[ key ] );
+        if( config && config.hasOwnProperty( key ) )
+        {
+          setInputValue( $input , config[ key ] );
+        }
+        else
+        {
+          setInputValue( $input , plugin.datasourceConfig[ key ].default );
+        }
       }
     }
-
-
 
     return {
       open : open,

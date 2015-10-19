@@ -65,7 +65,7 @@ App.Controller.Dashboard = ( function() {
     if( selectedPlugin !== null && id == selectedPlugin.id ) return;
     selectedPlugin = App.Plugins.getPlugin( id );
 
-    App.View.Dashboard.Modal.loadPluginConfig( selectedPlugin );
+    App.View.Dashboard.Modal.loadPluginConfig( selectedPlugin , editingChart );
   }
 
   function chartDatasourceClick( event )
