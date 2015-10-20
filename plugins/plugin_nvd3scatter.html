@@ -76,6 +76,10 @@
         var regressionResult = ss.linearRegression( this.data[ index ].values.map( function( v ) { return [ v.x , v.y ]; } ) );
         this.data[ index ].slope = regressionResult.m;
         this.data[ index ].intercept = regressionResult.b;
+
+        // HACK: Avoid weak falsy tests performed by the library
+        if( this.data[ index ].slope === 0 ) this.data[ index ].slope += 0.00000001;
+        if( this.data[ index ].intercept === 0 ) this.data[ index ].intercept += 0.00000001;
       }
 
       this.chart.update();
