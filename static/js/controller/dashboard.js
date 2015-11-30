@@ -35,6 +35,15 @@ App.Controller.Dashboard = ( function() {
           } );
         } );
       }
+      else
+      {
+        // Quick-fix: Wait to make sure page fade completes before changing pages
+        // TODO: Add navigation queue
+        console.log( "Dashboard not found: " + data );
+        setTimeout( function() {
+          App.Page.navigateTo( "" );
+        } , 500 );
+      }
     }
     else
     {
