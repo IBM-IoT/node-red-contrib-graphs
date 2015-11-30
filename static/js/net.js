@@ -9,7 +9,7 @@ App.Net = ( function() {
   {
     var dfd = $.Deferred();
 
-    ws = new WebSocket( "ws://" + location.host + "/dash/dsws" );
+    ws = new WebSocket( ( location.protocol == "https:" ? "wss" : "ws" ) + "://" + location.host + "/dash/dsws" );
 
     ws.onopen = function( event ) {
       App.View.Status.setConnected( true );
