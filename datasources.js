@@ -15,18 +15,16 @@ function init( _RED )
   app.get( "/" , function( request , response ) {
 
     var data = {};
-    var nodes = RED.nodes.getFlows();
 
-    for( var i = 0; i < nodes.length; i++ )
-    {
-      if( nodes[i].type == "iot-datasource" )
+    RED.nodes.eachNode( function( nodeObj ) {
+      if( nodeObj.type == "iot-datasource" )
       {
-        var node = RED.nodes.getNode( nodes[i].id );
-        if( !node ) continue;
+        var node = RED.nodes.getNode( nodeObj.id );
+        if( !node ) return;
 
-        data[ node.id ] = node.getDatasourceConfig();
+        data[ nodeObj.id ] = node.getDatasourceConfig();
       }
-    }
+    } );
 
     response.setHeader( "Content-Type" , "application/json" );
     response.end( JSON.stringify( data ) );
