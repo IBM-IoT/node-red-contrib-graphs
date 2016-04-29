@@ -114,3 +114,8 @@ All chart types in this application are plugins. These plugins are located in th
 
 When creating a new chart, any datasource nodes deployed in Node-RED will be available to select.
 For example, if you've tried out one of the example flows included above, when creating a new chart, the datasource "Random Datasource" will be available. If not, make sure the flow was deployed or try refreshing the dashboard page.
+
+
+# Additional Information
+
+The node-red-contrib-graphs node is also part of IBM's Iot Gateway Kit at <http://github.com/ibm-iot/iot-gateway-kit>.  The graph node is used to create a dashboard and graph data for the Informix database, although the dash node has no dependencies on Informix.
