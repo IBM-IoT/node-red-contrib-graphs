@@ -15,7 +15,10 @@
     "graphs",
     "gateway",
     "kit",
-    "IBM"
+    "IBM",
+    "Informix",
+    "iot",
+    "Internet of Things"
   ],
   "author": "Cristian Traistaru <traistar@us.ibm.com>",
   "license": "Apache",
