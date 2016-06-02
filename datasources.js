@@ -62,9 +62,12 @@ function init( _RED )
 
   } );
 
+  var wsPath = RED.settings.httpNodeRoot || "/";
+  wsPath += ( wsPath[ wsPath.length - 1 ] === "/" ? "" : "/" ) + "dash/dsws";
+
   wsServer = new WebSocketServer( {
     server : RED.server,
-    path : "/dash/dsws",
+    path : wsPath
   } );
 
   wsServer.on( "connection" , handleWSConnection );
