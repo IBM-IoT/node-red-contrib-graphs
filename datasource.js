@@ -1,6 +1,7 @@
 
 var util = require( "util" );
 var dashServer = require( "./server" );
+var datasourceManager = require( "./datasources" );
 
 module.exports = function(RED)
 {
@@ -20,6 +21,9 @@ module.exports = function(RED)
       this.clients = [];
       this.currentHistoryRequest = null;
       this.historyRequests = {};
+      
+      this.nodeID = this._alias || this.id;
+      datasourceManager.addNode(this.nodeID, this);
 
       this.on( "input" , function( msg ) {
 
@@ -30,7 +34,7 @@ module.exports = function(RED)
           self.dataComponents = undefined;
           self.sendToAll( JSON.stringify( {
             type : "config",
-            id : self.id,
+            id : self.nodeID,
             config : self.getDatasourceConfig()
           } ) );
           return;
@@ -57,7 +61,7 @@ module.exports = function(RED)
 
           var configMsg = {
             type : "config",
-            id : self.id,
+            id : self.nodeID,
             config : self.getDatasourceConfig()
           };
 
@@ -77,7 +81,7 @@ module.exports = function(RED)
         {
           newData = {
             type : "history",
-            id : self.id,
+            id : self.nodeID,
             cid : self.currentHistoryRequest.cid,
             data : msg.payload
           };
@@ -88,7 +92,7 @@ module.exports = function(RED)
         {
           newData = {
             type : "live",
-            id : self.id,
+            id : self.nodeID,
             data : msg.payload
           };
           newData = JSON.stringify( newData );
@@ -104,6 +108,8 @@ module.exports = function(RED)
         {
           self.clients[i].ws.close();
         }
+        
+        datasourceManager.removeNode(self.nodeID);
       } );
 
       // Finds the index of a data point inside an array of data points sorted by unique timestamp
@@ -153,7 +159,7 @@ module.exports = function(RED)
         this.clients.push( client );
         var configMsg = {
           type : "config",
-          id : this.id,
+          id : this.nodeID,
           config : this.getDatasourceConfig()
         };
 

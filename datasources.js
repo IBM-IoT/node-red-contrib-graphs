@@ -8,23 +8,18 @@ var wsServer = null;
 
 var app = express();
 
+var datasourceNodes = {};
+
 function init( _RED )
 {
   RED = _RED;
-
+  
   app.get( "/" , function( request , response ) {
 
     var data = {};
-
-    RED.nodes.eachNode( function( nodeObj ) {
-      if( nodeObj.type == "iot-datasource" )
-      {
-        var node = RED.nodes.getNode( nodeObj.id );
-        if( !node ) return;
-
-        data[ nodeObj.id ] = node.getDatasourceConfig();
-      }
-    } );
+    for( var key in datasourceNodes ) {
+      data[ key ] = datasourceNodes[ key ].getDatasourceConfig();
+    }
 
     response.setHeader( "Content-Type" , "application/json" );
     response.end( JSON.stringify( data ) );
@@ -48,7 +43,7 @@ function init( _RED )
       var end = parseInt( request.query.end );
       if( isNaN( start ) || isNaN( end ) ) throw 1;
 
-      var node = RED.nodes.getNode( request.query.id );
+      var node = getNode( request.query.id );
       if( !node ) throw 1;
 
       node.handleHistoryRequest( response , start , end );
@@ -94,7 +89,7 @@ function handleWSConnection( ws )
       if( !util.isArray( msg.id ) ) msg.id = [ msg.id ];
       for( i = 0; i < msg.id.length; i++ )
       {
-        node = RED.nodes.getNode( msg.id[i] );
+        node = getNode( msg.id[i] );
         if( node )
         {
           node.addClient( { ws : ws } );
@@ -106,7 +101,7 @@ function handleWSConnection( ws )
       if( !util.isArray( msg.id ) ) msg.id = [ msg.id ];
       for( i = 0; i < msg.id.length; i++ )
       {
-        node = RED.nodes.getNode( msg.id[i] );
+        node = getNode( msg.id[i] );
         if( node )
         {
           node.removeClient( ws );
@@ -115,7 +110,7 @@ function handleWSConnection( ws )
     }
     else if( msg.m == "hist" )
     {
-      node = RED.nodes.getNode( msg.dsid );
+      node = getNode( msg.dsid );
       if( node )
       {
         node.handleHistoryRequest( ws , msg.cid , msg.start , msg.end );
@@ -136,8 +131,22 @@ function handleWSConnection( ws )
   } );
 }
 
+function addNode( id, node ) {
+  datasourceNodes[ id ] = node;
+}
+
+function removeNode( id ) {
+  delete datasourcesNodes[ id ];
+}
+
+function getNode( id ) {
+  return datasourceNodes[ id ];
+}
+
 module.exports = {
   app : app,
 
-  init : init
+  init : init,
+  addNode : addNode,
+  removeNode : removeNode
 };
