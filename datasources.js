@@ -136,7 +136,7 @@ function addNode( id, node ) {
 }
 
 function removeNode( id ) {
-  delete datasourcesNodes[ id ];
+  delete datasourceNodes[ id ];
 }
 
 function getNode( id ) {
